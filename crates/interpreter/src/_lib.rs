@@ -4,6 +4,7 @@
 
 mod addr;                           pub use addr::*;
 mod decode;                         pub use decode::*;
+pub mod font;
 mod memory;                         pub use memory::*;
 mod nibble;                         pub use nibble::*;
 mod op;                             pub use op::*;

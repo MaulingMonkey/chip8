@@ -12,3 +12,13 @@ path                = "src/_lib.rs"
 [dependencies]
 bytemuck.version    = "1"
 bytemuck.features   = ["derive"]
+
+[dev-dependencies]
+winapi.version      = "0.3"
+winapi.features = [
+    # um
+    "consoleapi",
+    "processenv",
+    "winbase",
+    "wincon",
+]

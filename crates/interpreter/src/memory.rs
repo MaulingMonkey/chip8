@@ -49,7 +49,7 @@ impl Memory4K {
     pub fn as_qwords_mut(&mut self) -> &mut [u64; 1<<9] { &mut self.0 }
 
     pub fn screen_monochrome_64x32_mut(&mut self) -> &mut ScreenMonochrome64x32 {
-        let screen = &mut self.as_qwords_mut()[(1<<19)-32..];
+        let screen = &mut self.as_qwords_mut()[(1<<9)-32..];
         let screen = bytemuck::cast_slice_mut(screen);
         let screen = bytemuck::from_bytes_mut(screen);
         screen

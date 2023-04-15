@@ -21,6 +21,16 @@
 
         // maulingmonkey-chip8-interpreter
         {
+            "label":            "cargo build --package maulingmonkey-chip8-interpreter --example chip8-console",
+            "command":          "cargo build --package maulingmonkey-chip8-interpreter --example chip8-console",
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
+        },
+        {
+            "label":            "cargo build --package maulingmonkey-chip8-interpreter --example chip8-console --release",
+            "command":          "cargo build --package maulingmonkey-chip8-interpreter --example chip8-console --release",
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
+        },
+        {
             "label":            "open repository (maulingmonkey-chip8-interpreter)",
             "windows":          { "command": "start \"\"    \"https://github.com/MaulingMonkey/chip8\"" },
             "linux":            { "command": "xdg-open      \"https://github.com/MaulingMonkey/chip8\"" },
