@@ -26,7 +26,7 @@ impl Context {
             #[inline(always)] fn call_mcs               (&mut self, addr: Addr)                 -> Self::Result { if addr == Addr(0) { return false } panic!("invalid mcs call: {addr} @ {}", self.0.registers.pc) }
             #[inline(always)] fn display_clear          (&mut self)                             -> Self::Result { self.0.screen().clear(); self.0.step() }
             #[inline(always)] fn flow_return            (&mut self)                             -> Self::Result { self.0.registers.pc = self.0.registers.stack.pop().expect("return without any stack"); true }
-            #[inline(always)] fn flow_goto              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.pc = addr; self.0.step() }
+            #[inline(always)] fn flow_goto              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.pc = addr; true }
             #[inline(always)] fn flow_call              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.stack.push(Addr(self.0.registers.pc.0 + 2)); self.0.registers.pc = addr; true }
             #[inline(always)] fn cond_v_eq_c            (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_cond(self.0.registers[v] == c) }
             #[inline(always)] fn cond_v_ne_c            (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_cond(self.0.registers[v] != c) }
