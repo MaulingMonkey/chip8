@@ -43,5 +43,45 @@
                 "searchMicrosoftSymbolServer": true,
             },
         },
+        {
+            "name":                     "example • chip8-disasm • debug",
+            "type":                     "cppdbg",
+            "request":                  "launch",
+            "internalConsoleOptions":   "openOnSessionStart",
+            "preLaunchTask":            "cargo build --package maulingmonkey-chip8-interpreter --example chip8-disasm",
+            "program":                  "${workspaceFolder}/target/debug/examples/chip8-disasm",
+            "cwd":                      "${workspaceFolder}",
+            "args":                     ["examples/test_opcode.ch8"],
+            "environment":              [ { "name": "RUST_BACKTRACE", "value": "1" } ],
+            "windows": {
+                "type":                 "cppvsdbg",
+                "program":              "${workspaceFolder}/target/debug/examples/chip8-disasm.exe",
+                "enableDebugHeap":      true,
+            },
+            "symbolOptions": {
+                // "cachePath":         "${env:TEMP}/SymbolCache"
+                "searchMicrosoftSymbolServer": true,
+            },
+        },
+        {
+            "name":                     "example • chip8-disasm • release",
+            "type":                     "cppdbg",
+            "request":                  "launch",
+            "internalConsoleOptions":   "openOnSessionStart",
+            "preLaunchTask":            "cargo build --package maulingmonkey-chip8-interpreter --example chip8-disasm --release",
+            "program":                  "${workspaceFolder}/target/release/examples/chip8-disasm",
+            "cwd":                      "${workspaceFolder}",
+            "args":                     ["examples/test_opcode.ch8"],
+            "environment":              [ { "name": "RUST_BACKTRACE", "value": "1" } ],
+            "windows": {
+                "type":                 "cppvsdbg",
+                "program":              "${workspaceFolder}/target/release/examples/chip8-disasm.exe",
+                "enableDebugHeap":      false,
+            },
+            "symbolOptions": {
+                // "cachePath":         "${env:TEMP}/SymbolCache"
+                "searchMicrosoftSymbolServer": true,
+            },
+        },
     ]
 }

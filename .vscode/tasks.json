@@ -31,6 +31,16 @@
             "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
         },
         {
+            "label":            "cargo build --package maulingmonkey-chip8-interpreter --example chip8-disasm",
+            "command":          "cargo build --package maulingmonkey-chip8-interpreter --example chip8-disasm",
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
+        },
+        {
+            "label":            "cargo build --package maulingmonkey-chip8-interpreter --example chip8-disasm --release",
+            "command":          "cargo build --package maulingmonkey-chip8-interpreter --example chip8-disasm --release",
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
+        },
+        {
             "label":            "open repository (maulingmonkey-chip8-interpreter)",
             "windows":          { "command": "start \"\"    \"https://github.com/MaulingMonkey/chip8\"" },
             "linux":            { "command": "xdg-open      \"https://github.com/MaulingMonkey/chip8\"" },
