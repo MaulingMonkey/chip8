@@ -72,6 +72,9 @@ impl Nibble {
 impl From<Nibble> for u8    { fn from(value: Nibble) -> Self { value.to_u8()    } }
 impl From<Nibble> for usize { fn from(value: Nibble) -> Self { value.to_usize() } }
 impl TryFrom<usize  > for Nibble { type Error = TryFromIntError; fn try_from(value: usize) -> Result<Self, Self::Error> { if value < 16 { Ok(Self::truncate8(value as _)) } else { Err(u8::try_from(-1).unwrap_err()) } } }
+impl TryFrom<u64    > for Nibble { type Error = TryFromIntError; fn try_from(value: u64  ) -> Result<Self, Self::Error> { if value < 16 { Ok(Self::truncate8(value as _)) } else { Err(u8::try_from(-1).unwrap_err()) } } }
+impl TryFrom<u32    > for Nibble { type Error = TryFromIntError; fn try_from(value: u32  ) -> Result<Self, Self::Error> { if value < 16 { Ok(Self::truncate8(value as _)) } else { Err(u8::try_from(-1).unwrap_err()) } } }
+impl TryFrom<u16    > for Nibble { type Error = TryFromIntError; fn try_from(value: u16  ) -> Result<Self, Self::Error> { if value < 16 { Ok(Self::truncate8(value as _)) } else { Err(u8::try_from(-1).unwrap_err()) } } }
 impl TryFrom<u8     > for Nibble { type Error = TryFromIntError; fn try_from(value: u8   ) -> Result<Self, Self::Error> { if value < 16 { Ok(Self::truncate8(value as _)) } else { Err(u8::try_from(-1).unwrap_err()) } } }
 
 impl Debug      for Nibble { fn fmt(&self, fmt: &mut Formatter) -> fmt::Result { Debug      ::fmt(&self.to_u8(), fmt) } }

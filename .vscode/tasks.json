@@ -54,5 +54,33 @@
             "osx":              { "command": "open          \"https://github.com/MaulingMonkey/chip8/issues\"" },
             "presentation":     { "clear": true, "panel": "shared", "reveal": "silent" },
         },
+
+
+
+        // maulingmonkey-chip8-website
+        {
+            "label":            "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi",
+            "command":          "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi",
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
+        },
+        {
+            "label":            "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi --release",
+            "command":          "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi --release",
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
+        },
+        {
+            "label":            "start server • debug",
+            "windows":          { "command": "start \"mmuhttpd•chip8\" mmuhttpd target/wasm32-wasi/debug" },
+            "dependsOn":        ["stop server", "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi"],
+        },
+        {
+            "label":            "start server • release",
+            "windows":          { "command": "start \"mmuhttpd•chip8\" mmuhttpd target/wasm32-wasi/release" },
+            "dependsOn":        ["stop server", "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi --release"],
+        },
+        {
+            "label":            "stop server",
+            "windows":          { "command": "taskkill /fi \"WINDOWTITLE eq mmuhttpd•chip8\"" },
+        },
     ]
 }

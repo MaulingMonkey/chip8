@@ -9,6 +9,10 @@ use crate::*;
     // ...?
 }
 
+impl core::fmt::Debug for Context {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "Context {{ ... }}") }
+}
+
 impl Context {
     pub fn new() -> Self { Self::default() }
 

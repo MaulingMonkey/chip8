@@ -1,0 +1,19 @@
+# https://doc.rust-lang.org/cargo/reference/manifest.html
+[package]
+name                = "maulingmonkey-chip8-website"
+version             = "0.0.0-git"
+edition             = "2021"
+repository          = "https://github.com/MaulingMonkey/chip8"
+license             = "Apache-2.0 OR MIT"
+
+[lib]
+crate-type          = ["cdylib"]
+path                = "src/website.rs"
+
+[dependencies]
+maulingmonkey-chip8-interpreter.path = "../interpreter"
+bytemuck.version    = "1"
+bytemuck.features   = ["derive"]
+
+[build-dependencies]
+mmrbi               = "0.0.19"

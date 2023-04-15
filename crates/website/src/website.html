@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en-US"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MaulingMonkey's CHIP-8 Interpreter</title>
+    <script defer src="src/website.js"></script>
+    <style>
+        canvas {
+            --scale:            8;
+            image-rendering:    pixelated;
+
+            position:           absolute;
+            top:                50%;
+            left:               50%;
+            width:              calc(var(--scale) * 64px);
+            height:             calc(var(--scale) * 32px);
+            border:             1px solid black;
+            border-width:       calc(var(--scale) * 1px);
+            border-radius:      calc(var(--scale) * 0.7px);
+            transform:          translate(-50%, -50%);
+        }
+    </style>
+</head><body>
+    <canvas width="64" height="32"></canvas>
+</body></html>

@@ -4,7 +4,7 @@
     "configurations": [
         // maulingmonkey-chip8-interpreter
         {
-            "name":                     "example • chip8-console • debug",
+            "name":                     "chip8-console • debug",
             "type":                     "cppdbg",
             "request":                  "launch",
             "externalConsole":          true,
@@ -24,7 +24,7 @@
             },
         },
         {
-            "name":                     "example • chip8-console • release",
+            "name":                     "chip8-console • release",
             "type":                     "cppdbg",
             "request":                  "launch",
             "externalConsole":          true,
@@ -44,7 +44,7 @@
             },
         },
         {
-            "name":                     "example • chip8-disasm • debug",
+            "name":                     "chip8-disasm • debug",
             "type":                     "cppdbg",
             "request":                  "launch",
             "internalConsoleOptions":   "openOnSessionStart",
@@ -64,7 +64,7 @@
             },
         },
         {
-            "name":                     "example • chip8-disasm • release",
+            "name":                     "chip8-disasm • release",
             "type":                     "cppdbg",
             "request":                  "launch",
             "internalConsoleOptions":   "openOnSessionStart",
@@ -81,6 +81,40 @@
             "symbolOptions": {
                 // "cachePath":         "${env:TEMP}/SymbolCache"
                 "searchMicrosoftSymbolServer": true,
+            },
+        },
+
+
+
+        // maulingmonkey-chip8-website
+        {
+            "name":                     "chrome • debug",
+            "type":                     "chrome",
+            "request":                  "launch",
+            "preLaunchTask":            "start server • debug",
+            "postDebugTask":            "stop server",
+            "url":                      "http://127.0.0.99:9001/",
+            "webRoot":                  "${workspaceFolder}/target/wasm32-wasi/debug",
+            "sourceMapRenames": true,
+            "sourceMapPathOverrides": {
+                "http://127.0.0.99:9001/":              "${workspaceFolder}/crates/website/src/website.html",
+                "http://127.0.0.99:9001/(index)":       "${workspaceFolder}/crates/website/src/website.html",
+                "http://127.0.0.99:9001/index.html":    "${workspaceFolder}/crates/website/src/website.html",
+            },
+        },
+        {
+            "name":                     "chrome • release",
+            "type":                     "chrome",
+            "request":                  "launch",
+            "preLaunchTask":            "start server • release",
+            "postDebugTask":            "stop server",
+            "url":                      "http://127.0.0.99:9001/",
+            "webRoot":                  "${workspaceFolder}/target/wasm32-wasi/release",
+            "sourceMapRenames": true,
+            "sourceMapPathOverrides": {
+                "http://127.0.0.99:9001/":              "${workspaceFolder}/crates/website/src/website.html",
+                "http://127.0.0.99:9001/(index)":       "${workspaceFolder}/crates/website/src/website.html",
+                "http://127.0.0.99:9001/index.html":    "${workspaceFolder}/crates/website/src/website.html",
             },
         },
     ]

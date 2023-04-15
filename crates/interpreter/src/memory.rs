@@ -14,6 +14,8 @@ impl Memory4K {
     pub fn read16(&self, addr: Addr) -> u16 { u16::from_be_bytes([self.read(addr), self.read(Addr(addr.0+1))]) }
     pub fn write(&mut self, addr: Addr, value: u8) { self.as_bytes_mut().get_mut(addr.to_usize() & 0xFFF).map(|b| *b = value); }
 
+    pub fn clear(&mut self) { self.0.fill(0) }
+
     pub fn copy_from_slice(&mut self, addr: Addr, src: &[u8]) -> Result<(), ()> {
         let dst = self.as_bytes_mut().get_mut(addr.to_usize()..).ok_or(())?;
         let dst = dst.get_mut(0..src.len()).ok_or(())?;
