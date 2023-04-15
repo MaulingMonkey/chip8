@@ -41,10 +41,17 @@
             "presentation":     { "clear": true, "panel": "shared", "reveal": "always" },
         },
         {
-            "label":            "open repository (maulingmonkey-chip8-interpreter)",
+            "label":            "open repository",
             "windows":          { "command": "start \"\"    \"https://github.com/MaulingMonkey/chip8\"" },
             "linux":            { "command": "xdg-open      \"https://github.com/MaulingMonkey/chip8\"" },
             "osx":              { "command": "open          \"https://github.com/MaulingMonkey/chip8\"" },
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "silent" },
+        },
+        {
+            "label":            "open issues",
+            "windows":          { "command": "start \"\"    \"https://github.com/MaulingMonkey/chip8/issues\"" },
+            "linux":            { "command": "xdg-open      \"https://github.com/MaulingMonkey/chip8/issues\"" },
+            "osx":              { "command": "open          \"https://github.com/MaulingMonkey/chip8/issues\"" },
             "presentation":     { "clear": true, "panel": "shared", "reveal": "silent" },
         },
     ]
