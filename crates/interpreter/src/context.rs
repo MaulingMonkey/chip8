@@ -23,7 +23,7 @@ impl Context {
         impl Decode for Step<'_> {
             type Result = bool;
             #[inline(always)] fn invalid                (&mut self, op: u16)                    -> Self::Result { panic!("invalid instruction: 0x{op:04x} @ {}", self.0.registers.pc) }
-            #[inline(always)] fn call_mcs               (&mut self, addr: Addr)                 -> Self::Result { if addr == Addr(0) { return false } panic!("invalid mcs call: {addr} @ {}", self.0.registers.pc) }
+            #[inline(always)] fn call_mcs               (&mut self, addr: Addr)                 -> Self::Result { panic!("invalid mcs call: {addr} @ {}", self.0.registers.pc) }
             #[inline(always)] fn display_clear          (&mut self)                             -> Self::Result { self.0.screen().clear(); self.0.step() }
             #[inline(always)] fn flow_return            (&mut self)                             -> Self::Result { self.0.registers.pc = self.0.registers.stack.pop().expect("return without any stack"); true }
             #[inline(always)] fn flow_goto              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.pc = addr; true }
