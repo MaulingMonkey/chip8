@@ -54,7 +54,8 @@ impl Context {
                 let mut sprite = [0u8; 16];
                 let sprite = &mut sprite[..h];
                 sprite.copy_from_slice(&self.0.memory.as_bytes_ref()[self.0.registers.i.to_usize()..][..h]);
-                self.0.screen().draw_sprite(x.into(), y.into(), sprite);
+                let overlap = self.0.screen().draw_sprite(x.into(), y.into(), sprite);
+                self.0.registers[VF] = overlap.into();
                 self.0.step()
             }
 

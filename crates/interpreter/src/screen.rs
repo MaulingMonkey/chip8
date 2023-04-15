@@ -40,17 +40,20 @@ impl ScreenMonochrome64x32 {
         let _ = self.try_set_pixel(x, y, value);
     }
 
-    pub fn draw_sprite(&mut self, x: usize, y: usize, sprite: &[u8]) {
+    pub fn draw_sprite(&mut self, x: usize, y: usize, sprite: &[u8]) -> bool {
+        let mut overlap = false;
         for (oy, row) in sprite.iter().copied().enumerate() {
             for ox in 0 .. 8 {
                 let x = x + ox;
                 let y = y + oy;
                 if let Some(original) = self.try_get_pixel(x, y) {
+                    overlap |= original;
                     if row & (0x80 >> ox) != 0 { // left to right
                         self.set_pixel(x, y, !original); // XOR behavior
                     }
                 }
             }
         }
+        overlap
     }
 }
