@@ -16,5 +16,16 @@
             "label":            "help",
             "command":          "cargo doc --no-deps --open",
         },
+
+
+
+        // maulingmonkey-chip8-interpreter
+        {
+            "label":            "open repository (maulingmonkey-chip8-interpreter)",
+            "windows":          { "command": "start \"\"    \"https://github.com/MaulingMonkey/chip8\"" },
+            "linux":            { "command": "xdg-open      \"https://github.com/MaulingMonkey/chip8\"" },
+            "osx":              { "command": "open          \"https://github.com/MaulingMonkey/chip8\"" },
+            "presentation":     { "clear": true, "panel": "shared", "reveal": "silent" },
+        },
     ]
 }
