@@ -44,7 +44,11 @@ pub struct Nibble(_Nibble);
 
 impl Nibble {
     pub const fn to_u8(self)    -> u8       { self.0 as _ }
+    pub const fn to_u16(self)   -> u16      { self.0 as _ }
     pub const fn to_usize(self) -> usize    { self.0 as _ }
+
+    pub(crate) fn array_ref<T>(self, array: &    [T; 16]) -> &    T { &    array[self.to_usize()] }
+    pub(crate) fn array_mut<T>(self, array: &mut [T; 16]) -> &mut T { &mut array[self.to_usize()] }
 
     #[track_caller] pub const fn truncate16(v: u16) -> Self { Self::truncate8(v as _) }
     #[track_caller] pub const fn truncate8(v: u8) -> Self {
@@ -61,6 +65,8 @@ impl Nibble {
         assert!(v < 16, "Nibble::literal(n) is out of bounds (0x0 ..= 0xF)");
         Self::truncate8(v)
     }
+
+    pub fn iter() -> impl Iterator<Item = Self> { (0 .. 16).map(|i| Self::truncate8(i)) }
 }
 
 impl From<Nibble> for u8    { fn from(value: Nibble) -> Self { value.to_u8()    } }

@@ -13,5 +13,9 @@ use core::fmt::{self, Debug, Display, Formatter};
 impl Display for V { fn fmt(&self, fmt: &mut Formatter) -> fmt::Result { write!(fmt, "V{:X}", self.0) } }
 impl Debug   for V { fn fmt(&self, fmt: &mut Formatter) -> fmt::Result { write!(fmt, "V{:X}", self.0) } }
 
+impl V {
+    pub fn iter() -> impl Iterator<Item = Self> { (0 .. 16).map(|i| Self(Nibble::truncate8(i))) }
+}
+
 #[doc(hidden)] pub const V0 : V = V(N0);
 #[doc(hidden)] pub const VF : V = V(NF);
