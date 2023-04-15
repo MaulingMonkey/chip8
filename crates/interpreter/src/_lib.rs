@@ -3,12 +3,12 @@
 #![deny(unreachable_patterns)]      // match { ... } bugs
 
 mod addr;                           pub use addr::*;
+mod context;                        pub use context::*;
 mod decode;                         pub use decode::*;
 pub mod font;
 mod memory;                         pub use memory::*;
 mod nibble;                         pub use nibble::*;
 mod op;                             pub use op::*;
 mod registers;                      pub use registers::*;
-mod run;                            pub use run::*;
 mod screen;                         pub use screen::*;
 mod v;                              pub use v::*;
