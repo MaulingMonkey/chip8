@@ -67,7 +67,7 @@ impl<S: Syscalls> Context<S> {
             #[inline(always)] fn skip_if_pressed        (&mut self, key: V)                     -> Self::Result { self.0.step_cond(true ) } // XXX: check actual keyboard
             #[inline(always)] fn skip_unless_pressed    (&mut self, key: V)                     -> Self::Result { self.0.step_cond(false) } // XXX: check actual keyboard
             #[inline(always)] fn get_delay_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers[v] = self.0.registers.delay_timer; self.0.step() }
-            #[inline(always)] fn await_key              (&mut self, v: V)                       -> Self::Result { false } // XXX: poll actual keyboard
+            #[inline(always)] fn await_key              (&mut self, v: V)                       -> Self::Result { let Some(key) = self.0.syscalls.get_key() else { return false }; self.0.registers[v] = key; self.0.step() }
             #[inline(always)] fn set_delay_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers.delay_timer = self.0.registers[v]; self.0.step() }
             #[inline(always)] fn set_sound_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers.sound_timer = self.0.registers[v]; self.0.step() }
             #[inline(always)] fn add_i_v                (&mut self, v: V)                       -> Self::Result { self.0.registers.i.0 += u16::from(self.0.registers[v]); self.0.step() }
