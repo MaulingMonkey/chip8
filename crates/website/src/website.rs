@@ -67,7 +67,7 @@ thread_local! {
     let mut ctx = Context::new();
     ctx.registers.pc = Addr::PROGRAM_START_TYPICAL;
     ctx.memory.copy_from_slice(Addr::SYSTEM_INTERPRETER_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
-    ctx.memory.copy_from_slice(ctx.registers.pc, include_bytes!("../../../examples/test_opcode.ch8")).expect("failed to copy test_opcode.ch8 ROM into memory");
+    ctx.memory.copy_from_slice(ctx.registers.pc, include_bytes!("../../../examples/sierpinski.ch8")).expect("failed to copy sierpinski.ch8 ROM into memory");
 
     CONTEXT.with(|tls| *tls.borrow_mut() = ctx);
 }
