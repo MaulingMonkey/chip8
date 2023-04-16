@@ -68,6 +68,7 @@ const wasm = WebAssembly.instantiateStreaming(fetch("maulingmonkey_chip8_website
 
 addEventListener("load", async function on_chip8_load() {
     const canvas = document.getElementsByTagName("canvas")[0];
+    const framebuffer = new ImageData(64, 32);
     const { module, instance } = await wasm;
     memory = instance.exports.memory || memory;
 
@@ -76,11 +77,10 @@ addEventListener("load", async function on_chip8_load() {
     function animation_frame() {
         raf_handle = requestAnimationFrame(animation_frame);
 
-        const id    = new ImageData(64, 32);
-        const dst   = new DataView(id.data.buffer);
-
+        const dst = new DataView(framebuffer.data.buffer);
         try {
-            const src   = new DataView(memory.buffer, instance.exports.lock_memory_range(0x0F00, 0x1000), 0x0100);
+            const src_start = instance.exports.lock_memory_range(0x0F00, 0x1000);
+            const src = new DataView(memory.buffer, src_start, 0x0100);
             for (let y=0; y<32; ++y) {
                 const row = src.getBigUint64(8*y);
                 for (let x=0; x<64; ++x) {
@@ -92,7 +92,7 @@ addEventListener("load", async function on_chip8_load() {
             instance.exports.unlock_memory_range();
         }
 
-        canvas.getContext("2d").putImageData(id, 0, 0);
+        canvas.getContext("2d").putImageData(framebuffer, 0, 0);
     }
     animation_frame();
 
