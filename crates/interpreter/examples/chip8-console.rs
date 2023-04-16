@@ -34,7 +34,7 @@ fn main() {
         // Redraw
         if now >= next_redraw {
             next_redraw = now + Duration::from_millis(200);
-            let _ = std::io::stdout().write_all(b"\x1b[2J"); // clear screen
+            let _ = std::io::stdout().write_all(b"\x1b[H"); // return cursor to 0,0
             let screen = ctx.screen();
             let mut stdout = std::io::stdout().lock();
             for y in 0 .. 32 {
