@@ -1,6 +1,14 @@
 "use strict";
 let raf_handle = undefined;
 let memory = new WebAssembly.Memory({ initial: 2 });
+
+const ERRNO = {
+    SUCCESS:    0,
+    BADF:       8,  // bad file descriptor
+    INVAL:      28, // invalid argument
+    NOSYS:      52, // function not supported
+};
+
 const wasm = WebAssembly.instantiateStreaming(fetch("maulingmonkey_chip8_website.wasm"), {
     console: {
         error: function console_error(start, len) {
@@ -26,23 +34,34 @@ const wasm = WebAssembly.instantiateStreaming(fetch("maulingmonkey_chip8_website
             const view = new DataView(memory.buffer);
             view.setUint32(o_array_len, 0, true);
             view.setUint32(o_buf_len, 2, true);
-            return 0; // ERRNO_SUCCESS
+            return ERRNO.SUCCESS;
         },
         environ_get: function environ_get(environ_array, environ_buf) {
             const view = new DataView(memory.buffer);
             view.setUint16(environ_buf, 0); // \0\0
-            return 0; // ERRNO_SUCCESS
+            return ERRNO.SUCCESS;
         },
         fd_read: function fd_read(fd, iovs_ptr, iovs_len) {
-            return 8; // ERRNO_BADF
+            return ERRNO.BADF;
         },
         fd_write: function fd_write(fd, iovs_ptr, iovs_len) {
-            return 8; // ERRNO_BADF
+            return ERRNO.BADF;
         },
         proc_exit: function proc_exit(code) {
             cancelAnimationFrame(raf_handle);
             throw code;
         },
+        random_get: function random_get_crypto(buf, len) {
+            if (!(self?.crypto?.getRandomValues)) {
+                return ERRNO.NOSYS;
+            } else try {
+                const view = new Uint8Array(memory.buffer, buf, len);
+                self.crypto.getRandomValues(view); // https://developer.mozilla.org/en-US/docs/Web/API/Crypto/getRandomValues
+                return ERRNO.SUCCESS;
+            } catch {
+                return ERRNO.INVAL;
+            }
+        }
     },
     // TODO: other imports?
 });

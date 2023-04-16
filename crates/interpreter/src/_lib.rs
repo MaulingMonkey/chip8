@@ -11,4 +11,5 @@ mod nibble;                         pub use nibble::*;
 mod op;                             pub use op::*;
 mod registers;                      pub use registers::*;
 mod screen;                         pub use screen::*;
+mod syscalls;                       pub use syscalls::*;
 mod v;                              pub use v::*;

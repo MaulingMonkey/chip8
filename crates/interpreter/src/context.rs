@@ -3,18 +3,19 @@ use crate::*;
 
 
 /// Execution context with methods like [`try_step_single`](Self::try_step_single), [`try_step_many`](Self::try_step_many), etc.
-#[derive(Default)] pub struct Context {
+#[derive(Default)] pub struct Context<S: Syscalls> {
     pub registers:  Registers,
     pub memory:     Memory4K,
+    pub syscalls:   S,
     // ...?
 }
 
-impl core::fmt::Debug for Context {
+impl<S: Syscalls> core::fmt::Debug for Context<S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "Context {{ ... }}") }
 }
 
-impl Context {
-    pub fn new() -> Self { Self::default() }
+impl<S: Syscalls> Context<S> {
+    pub fn new() -> Self where S : Default { Self::default() }
 
     pub fn screen(&mut self) -> &mut ScreenMonochrome64x32 { self.memory.screen_monochrome_64x32_mut() }
 
@@ -23,8 +24,8 @@ impl Context {
         let op = Op(self.memory.read16(self.registers.pc));
         return op.decode(&mut Step(self));
 
-        #[repr(transparent)] struct Step<'a>(&'a mut Context);
-        impl Decode for Step<'_> {
+        #[repr(transparent)] struct Step<'a, S: Syscalls>(&'a mut Context<S>);
+        impl<S: Syscalls> Decode for Step<'_, S> {
             type Result = bool;
             #[inline(always)] fn invalid                (&mut self, op: u16)                    -> Self::Result { panic!("invalid instruction: 0x{op:04x} @ {}", self.0.registers.pc) }
             #[inline(always)] fn call_mcs               (&mut self, addr: Addr)                 -> Self::Result { panic!("invalid mcs call: {addr} @ {}", self.0.registers.pc) }
@@ -49,7 +50,7 @@ impl Context {
             #[inline(always)] fn cond_v_ne_v            (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_cond(self.0.registers[vx] != self.0.registers[vy]) }
             #[inline(always)] fn set_i_c                (&mut self, c: Addr)                    -> Self::Result { self.0.registers.i = c; self.0.step() }
             #[inline(always)] fn set_pc_v0_plus_c       (&mut self, _v0: (), c: Addr)           -> Self::Result { self.0.registers.pc = Addr((u16::from(self.0.registers[V0]) + c.0) & 0xFFF); true } // XXX: overflow?
-            #[inline(always)] fn set_v_rand_mask        (&mut self, v: V, mask: u8)             -> Self::Result { let _ = (v, mask); todo!("rand() NYI") }
+            #[inline(always)] fn set_v_rand_mask        (&mut self, v: V, mask: u8)             -> Self::Result { self.0.registers[v] = self.0.syscalls.rand() & mask; self.0.step() }
 
             #[inline(always)] fn draw_x_y_h(&mut self, vx: V, vy: V, h: Nibble) -> Self::Result {
                 let x = self.0.registers[vx];

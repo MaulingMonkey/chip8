@@ -1,4 +1,5 @@
 use maulingmonkey_chip8_interpreter::*;
+type Context = maulingmonkey_chip8_interpreter::Context<()>;
 
 use core::cell::RefCell;
 use std::cell::RefMut;
