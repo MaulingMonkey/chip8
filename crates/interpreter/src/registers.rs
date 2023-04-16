@@ -17,6 +17,7 @@ pub struct Registers { // https://en.wikipedia.org/wiki/CHIP-8#Registers
     pub(crate) stack:       Vec<Addr>, // could also live somewhere in memory[0xEA0 ..= 0xEFF]
     pub(crate) delay_timer: u8,
     pub(crate) sound_timer: u8,
+    pub(crate) sound_playing: bool,
 }
 
 impl core::ops::Index<V> for Registers {

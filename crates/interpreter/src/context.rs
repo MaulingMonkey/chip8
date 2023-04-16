@@ -88,7 +88,22 @@ impl<S: Syscalls> Context<S> {
 
     pub fn step_clocks(&mut self) {
         self.registers.delay_timer = self.registers.delay_timer.saturating_sub(1);
-        self.registers.sound_timer = self.registers.sound_timer.saturating_sub(1); // play sound while != 0?
+        self.registers.sound_timer = self.registers.sound_timer.saturating_sub(1);
+
+        // N.B. by waiting until after the `saturating_sub`s to check timer state, sound will only play if sound_timer >= 2.
+        // This is intentional - as noted by https://github.com/mattmikolay/chip-8/wiki/Mastering-CHIP%E2%80%908#timers :
+        //
+        // "It should be noted that in the COSMAC VIP manual, it was made clear that the minimum value that the timer
+        // will respond to is 02. Thus, setting the timer to a value of 01 would have no audible effect."
+        //
+        // Other impls might have different behavior, but I've chosen to match the COSMAC VIP in this regard.
+        // https://en.wikipedia.org/wiki/COSMAC_VIP
+        //
+        match (self.registers.sound_playing, self.registers.sound_timer > 0) {
+            (true, false)   => self.syscalls.sound_stop(),
+            (false, true)   => self.syscalls.sound_play(),
+            _               => {},
+        }
     }
 
     #[inline] fn advance(&mut self, n: u16) -> bool { self.registers.pc.0 += n; true }
