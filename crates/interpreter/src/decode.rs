@@ -14,9 +14,9 @@ pub trait Decode {
     #[doc = "`00EE`"] fn flow_return            (&mut self)                             -> Self::Result { self.call_mcs(Addr(0x00EE)) }
     #[doc = "`1NNN`"] fn flow_goto              (&mut self, addr: Addr)                 -> Self::Result;
     #[doc = "`2NNN`"] fn flow_call              (&mut self, addr: Addr)                 -> Self::Result;
-    #[doc = "`3XNN`"] fn cond_v_eq_c            (&mut self, v: V, c: u8)                -> Self::Result; // TODO: unscramble conditional inversion
-    #[doc = "`4XNN`"] fn cond_v_ne_c            (&mut self, v: V, c: u8)                -> Self::Result; // TODO: unscramble conditional inversion
-    #[doc = "`5XY0`"] fn cond_v_eq_v            (&mut self, vx: V, vy: V)               -> Self::Result; // TODO: unscramble conditional inversion
+    #[doc = "`3XNN`"] fn skip_if_v_eq_c         (&mut self, v: V, c: u8)                -> Self::Result;
+    #[doc = "`4XNN`"] fn skip_if_v_ne_c         (&mut self, v: V, c: u8)                -> Self::Result;
+    #[doc = "`5XY0`"] fn skip_if_v_eq_v         (&mut self, vx: V, vy: V)               -> Self::Result;
     #[doc = "`6XNN`"] fn set_v_c                (&mut self, vx: V, c: u8)               -> Self::Result;
     #[doc = "`7XNN`"] fn add_v_c                (&mut self, vx: V, c: u8)               -> Self::Result;
     #[doc = "`8XY0`"] fn set_v_v                (&mut self, vx: V, vy: V)               -> Self::Result;
@@ -28,13 +28,13 @@ pub trait Decode {
     #[doc = "`8XY6`"] fn shr1_v                 (&mut self, vx: V, _y: V)               -> Self::Result; // is `y` unused?
     #[doc = "`8XY7`"] fn sub_v_v_alt            (&mut self, vx: V, vy: V)               -> Self::Result;
     #[doc = "`8XYE`"] fn shl1_v                 (&mut self, vx: V, _y: V)               -> Self::Result; // is `y` unused?
-    #[doc = "`9XY0`"] fn cond_v_ne_v            (&mut self, vx: V, vy: V)               -> Self::Result; // TODO: unscramble conditional inversion
+    #[doc = "`9XY0`"] fn skip_if_v_ne_v         (&mut self, vx: V, vy: V)               -> Self::Result;
     #[doc = "`ANNN`"] fn set_i_c                (&mut self, c: Addr)                    -> Self::Result;
     #[doc = "`BNNN`"] fn set_pc_v0_plus_c       (&mut self, _v0: (), c: Addr)           -> Self::Result;
     #[doc = "`CXNN`"] fn set_v_rand_mask        (&mut self, v: V, mask: u8)             -> Self::Result;
     #[doc = "`DXYN`"] fn draw_x_y_h             (&mut self, vx: V, vy: V, h: Nibble)    -> Self::Result;
-    #[doc = "`EX9E`"] fn skip_if_pressed        (&mut self, key: V)                     -> Self::Result; // TODO: unscramble conditional inversion
-    #[doc = "`EXA1`"] fn skip_unless_pressed    (&mut self, key: V)                     -> Self::Result; // TODO: unscramble conditional inversion
+    #[doc = "`EX9E`"] fn skip_if_pressed        (&mut self, key: V)                     -> Self::Result;
+    #[doc = "`EXA1`"] fn skip_unless_pressed    (&mut self, key: V)                     -> Self::Result;
     #[doc = "`FX07`"] fn get_delay_timer        (&mut self, v: V)                       -> Self::Result;
     #[doc = "`FX0A`"] fn await_key              (&mut self, v: V)                       -> Self::Result;
     #[doc = "`FX15`"] fn set_delay_timer        (&mut self, v: V)                       -> Self::Result;
@@ -64,9 +64,9 @@ impl Op {
             },
             N1 => decode.flow_goto(addr3(op)),
             N2 => decode.flow_call(addr3(op)),
-            N3 => decode.cond_v_eq_c(v(op>>8), b(op>>0)),
-            N4 => decode.cond_v_ne_c(v(op>>8), b(op>>0)),
-            N5 if n(op>>0) == N0 => decode.cond_v_eq_v(v(op>>8), v(op>>4)),
+            N3 => decode.skip_if_v_eq_c(v(op>>8), b(op>>0)),
+            N4 => decode.skip_if_v_ne_c(v(op>>8), b(op>>0)),
+            N5 if n(op>>0) == N0 => decode.skip_if_v_eq_v(v(op>>8), v(op>>4)),
             N5 => decode.invalid(op),
             N6 => decode.set_v_c(v(op>>8), b(op>>0)),
             N7 => decode.add_v_c(v(op>>8), b(op>>0)),
@@ -91,7 +91,7 @@ impl Op {
                 let vx = v(op>>8);
                 let vy = v(op>>4);
                 match n(op>>0) {
-                    N0 => decode.cond_v_ne_v(vx, vy),
+                    N0 => decode.skip_if_v_ne_v(vx, vy),
                     _ => decode.invalid(op),
                 }
             },

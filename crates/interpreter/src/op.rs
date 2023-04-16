@@ -19,9 +19,9 @@ impl Debug for Op {
             fn flow_return          (&mut self)                             -> Self::Result { write!(self.0, "return") }
             fn flow_goto            (&mut self, addr: Addr)                 -> Self::Result { write!(self.0, "pc <- {addr}") }
             fn flow_call            (&mut self, addr: Addr)                 -> Self::Result { write!(self.0, "call {addr}") }
-            fn cond_v_eq_c          (&mut self, v: V, c: u8)                -> Self::Result { write!(self.0, "if {v} == 0x{c:02X}") }
-            fn cond_v_ne_c          (&mut self, v: V, c: u8)                -> Self::Result { write!(self.0, "if {v} != 0x{c:02X}") }
-            fn cond_v_eq_v          (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "if {vx} == {vy}") }
+            fn skip_if_v_eq_c       (&mut self, v: V, c: u8)                -> Self::Result { write!(self.0, "skip_if {v} == 0x{c:02X}") }
+            fn skip_if_v_ne_c       (&mut self, v: V, c: u8)                -> Self::Result { write!(self.0, "skip_if {v} != 0x{c:02X}") }
+            fn skip_if_v_eq_v       (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "skip_if {vx} == {vy}") }
             fn set_v_c              (&mut self, vx: V, c: u8)               -> Self::Result { write!(self.0, "{vx} <- 0x{c:02X}") }
             fn add_v_c              (&mut self, vx: V, c: u8)               -> Self::Result { write!(self.0, "{vx} <- {vx} + 0x{c:02X}") }
             fn set_v_v              (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vy}") }
@@ -33,13 +33,13 @@ impl Debug for Op {
             fn shr1_v               (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} >> 1 ; {vy}") }
             fn sub_v_v_alt          (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vy} - {vx}") }
             fn shl1_v               (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} << 1 ; {vy}") }
-            fn cond_v_ne_v          (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "if {vx} != {vy}") }
+            fn skip_if_v_ne_v       (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "skip_if {vx} != {vy}") }
             fn set_i_c              (&mut self, c: Addr)                    -> Self::Result { write!(self.0, "i <- {c}") }
             fn set_pc_v0_plus_c     (&mut self, _v0: (), c: Addr)           -> Self::Result { write!(self.0, "pc <- V0 + {c}") }
             fn set_v_rand_mask      (&mut self, v: V, mask: u8)             -> Self::Result { write!(self.0, "{v} <- rand() & 0x{mask:02X}") }
             fn draw_x_y_h           (&mut self, vx: V, vy: V, h: Nibble)    -> Self::Result { write!(self.0, "draw_sprite(x={vx}, y={vy}, h={h}, sprite=i)") }
-            fn skip_if_pressed      (&mut self, key: V)                     -> Self::Result { write!(self.0, "if !key_pressed({key})") }  // XXX: doublecheck
-            fn skip_unless_pressed  (&mut self, key: V)                     -> Self::Result { write!(self.0, "if key_pressed({key})") }   // XXX: doublecheck
+            fn skip_if_pressed      (&mut self, key: V)                     -> Self::Result { write!(self.0, "skip_if key_pressed({key})") }
+            fn skip_unless_pressed  (&mut self, key: V)                     -> Self::Result { write!(self.0, "skip_if !key_pressed({key})") }
             fn get_delay_timer      (&mut self, v: V)                       -> Self::Result { write!(self.0, "{v} <- delay_timer") }
             fn await_key            (&mut self, v: V)                       -> Self::Result { write!(self.0, "{v} <- get_key()") }
             fn set_delay_timer      (&mut self, v: V)                       -> Self::Result { write!(self.0, "delay_timer <- {v}") }
@@ -60,10 +60,10 @@ impl Debug for Op {
 
     assert_eq!(format!("{:?}", Op(0x1234)), "pc <- 0x234");
     assert_eq!(format!("{:?}", Op(0x2345)), "call 0x345");
-    assert_eq!(format!("{:?}", Op(0x3456)), "if V4 == 0x56"); // TODO: if → unless ?
-    assert_eq!(format!("{:?}", Op(0x4567)), "if V5 != 0x67"); // TODO: if → unless ?
+    assert_eq!(format!("{:?}", Op(0x3456)), "skip_if V4 == 0x56"); // TODO: if → unless ?
+    assert_eq!(format!("{:?}", Op(0x4567)), "skip_if V5 != 0x67"); // TODO: if → unless ?
 
-    assert_eq!(format!("{:?}", Op(0x5670)), "if V6 == V7");
+    assert_eq!(format!("{:?}", Op(0x5670)), "skip_if V6 == V7");
     assert_eq!(format!("{:?}", Op(0x5678)), "invalid ; 0x5678");
 
     assert_eq!(format!("{:?}", Op(0x6123)), "V1 <- 0x23");
@@ -87,7 +87,7 @@ impl Debug for Op {
     assert_eq!(format!("{:?}", Op(0x8CDE)), "VC <- VC << 1 ; VD");
     assert_eq!(format!("{:?}", Op(0x8DEF)), "invalid ; 0x8DEF");
 
-    assert_eq!(format!("{:?}", Op(0x9210)), "if V2 != V1");
+    assert_eq!(format!("{:?}", Op(0x9210)), "skip_if V2 != V1");
     assert_eq!(format!("{:?}", Op(0x9001)), "invalid ; 0x9001");
 
     assert_eq!(format!("{:?}", Op(0xA123)), "i <- 0x123");
@@ -96,8 +96,8 @@ impl Debug for Op {
     assert_eq!(format!("{:?}", Op(0xD45A)), "draw_sprite(x=V4, y=V5, h=10, sprite=i)");
 
     assert_eq!(format!("{:?}", Op(0xE123)), "invalid ; 0xE123");
-    assert_eq!(format!("{:?}", Op(0xEF9E)), "if !key_pressed(VF)");
-    assert_eq!(format!("{:?}", Op(0xEEA1)), "if key_pressed(VE)");
+    assert_eq!(format!("{:?}", Op(0xEF9E)), "skip_if key_pressed(VF)");
+    assert_eq!(format!("{:?}", Op(0xEEA1)), "skip_if !key_pressed(VE)");
 
     assert_eq!(format!("{:?}", Op(0xFA07)), "VA <- delay_timer");
     assert_eq!(format!("{:?}", Op(0xFB0A)), "VB <- get_key()");

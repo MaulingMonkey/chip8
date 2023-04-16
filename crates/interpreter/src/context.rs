@@ -33,9 +33,9 @@ impl<S: Syscalls> Context<S> {
             #[inline(always)] fn flow_return            (&mut self)                             -> Self::Result { self.0.registers.pc = self.0.registers.stack.pop().expect("return without any stack"); true }
             #[inline(always)] fn flow_goto              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.pc = addr; true }
             #[inline(always)] fn flow_call              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.stack.push(Addr(self.0.registers.pc.0 + 2)); self.0.registers.pc = addr; true }
-            #[inline(always)] fn cond_v_eq_c            (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_cond(self.0.registers[v] == c) }
-            #[inline(always)] fn cond_v_ne_c            (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_cond(self.0.registers[v] != c) }
-            #[inline(always)] fn cond_v_eq_v            (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_cond(self.0.registers[vx] == self.0.registers[vy]) }
+            #[inline(always)] fn skip_if_v_eq_c         (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_skip_if(self.0.registers[v] == c) }
+            #[inline(always)] fn skip_if_v_ne_c         (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_skip_if(self.0.registers[v] != c) }
+            #[inline(always)] fn skip_if_v_eq_v         (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_skip_if(self.0.registers[vx] == self.0.registers[vy]) }
             #[inline(always)] fn set_v_c                (&mut self, vx: V, c: u8)               -> Self::Result { self.0.registers[vx] =  c; self.0.step() }
             #[inline(always)] fn add_v_c                (&mut self, vx: V, c: u8)               -> Self::Result { self.0.registers[vx] =  self.0.registers[vx].wrapping_add(c); self.0.step() }
             #[inline(always)] fn set_v_v                (&mut self, vx: V, vy: V)               -> Self::Result { self.0.registers[vx] =  self.0.registers[vy]; self.0.step() }
@@ -47,7 +47,7 @@ impl<S: Syscalls> Context<S> {
             #[inline(always)] fn shr1_v                 (&mut self, vx: V, _y: V)               -> Self::Result { let vx = &mut self.0.registers[vx]; let carry = *vx & 1; *vx >>= 1; self.0.registers[VF] = carry; self.0.step() }
             #[inline(always)] fn sub_v_v_alt            (&mut self, vx: V, vy: V)               -> Self::Result { self.0.registers[vx]  = self.0.registers[vy].wrapping_sub(self.0.registers[vx]); self.0.step() }
             #[inline(always)] fn shl1_v                 (&mut self, vx: V, _y: V)               -> Self::Result { let vx = &mut self.0.registers[vx]; let carry = *vx & 0x80; *vx <<= 1; self.0.registers[VF] = carry; self.0.step() }
-            #[inline(always)] fn cond_v_ne_v            (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_cond(self.0.registers[vx] != self.0.registers[vy]) }
+            #[inline(always)] fn skip_if_v_ne_v         (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_skip_if(self.0.registers[vx] != self.0.registers[vy]) }
             #[inline(always)] fn set_i_c                (&mut self, c: Addr)                    -> Self::Result { self.0.registers.i = c; self.0.step() }
             #[inline(always)] fn set_pc_v0_plus_c       (&mut self, _v0: (), c: Addr)           -> Self::Result { self.0.registers.pc = Addr((u16::from(self.0.registers[V0]) + c.0) & 0xFFF); true } // XXX: overflow?
             #[inline(always)] fn set_v_rand_mask        (&mut self, v: V, mask: u8)             -> Self::Result { self.0.registers[v] = self.0.syscalls.rand() & mask; self.0.step() }
@@ -64,8 +64,8 @@ impl<S: Syscalls> Context<S> {
                 self.0.step()
             }
 
-            #[inline(always)] fn skip_if_pressed        (&mut self, key: V)                     -> Self::Result { self.0.step_cond(true ) } // XXX: check actual keyboard
-            #[inline(always)] fn skip_unless_pressed    (&mut self, key: V)                     -> Self::Result { self.0.step_cond(false) } // XXX: check actual keyboard
+            #[inline(always)] fn skip_if_pressed        (&mut self, key: V)                     -> Self::Result { self.0.step_skip_if(self.0.syscalls.is_pressed(self.0.registers[key])) }
+            #[inline(always)] fn skip_unless_pressed    (&mut self, key: V)                     -> Self::Result { self.0.step_skip_if(self.0.syscalls.is_pressed(self.0.registers[key])) }
             #[inline(always)] fn get_delay_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers[v] = self.0.registers.delay_timer; self.0.step() }
             #[inline(always)] fn await_key              (&mut self, v: V)                       -> Self::Result { let Some(key) = self.0.syscalls.get_key() else { return false }; self.0.registers[v] = key; self.0.step() }
             #[inline(always)] fn set_delay_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers.delay_timer = self.0.registers[v]; self.0.step() }
@@ -93,7 +93,7 @@ impl<S: Syscalls> Context<S> {
 
     #[inline] fn advance(&mut self, n: u16) -> bool { self.registers.pc.0 += n; true }
     fn step(&mut self) -> bool { self.advance(2) }
-    fn step_cond(&mut self, skip: bool) -> bool { self.advance(if skip { 4 } else { 2 }) }
+    fn step_skip_if(&mut self, skip: bool) -> bool { self.advance(if skip { 4 } else { 2 }) }
 }
 
 fn bcd(b: u8) -> [u8; 3] { [b / 100, b/10%10, b%10] }
