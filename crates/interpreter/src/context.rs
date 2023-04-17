@@ -99,11 +99,13 @@ impl<S: Syscalls> Context<S> {
         // Other impls might have different behavior, but I've chosen to match the COSMAC VIP in this regard.
         // https://en.wikipedia.org/wiki/COSMAC_VIP
         //
-        match (self.registers.sound_playing, self.registers.sound_timer > 0) {
+        let should_play = self.registers.sound_timer > 0;
+        match (self.registers.sound_playing, should_play) {
             (true, false)   => self.syscalls.sound_stop(),
             (false, true)   => self.syscalls.sound_play(),
             _               => {},
         }
+        self.registers.sound_playing = should_play;
     }
 
     #[inline] fn advance(&mut self, n: u16) -> bool { self.registers.pc.0 += n; true }
