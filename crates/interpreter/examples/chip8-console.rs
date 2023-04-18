@@ -114,6 +114,6 @@ fn main() {
     struct VoiceCallback;
     impl xaudio2::VoiceCallback for VoiceCallback {
         type BufferContext = ();
-        fn on_voice_error(&self, _buffer_context: &Self::BufferContext, error: winresult::HResult) { panic!("{error:?}"); }
+        fn on_voice_error(&self, _buffer_context: &Self::BufferContext, error: xaudio2::HResult) { panic!("{error:?}"); }
     }
 }

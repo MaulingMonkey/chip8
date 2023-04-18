@@ -21,8 +21,7 @@ rand.optional       = true
 
 [target.'cfg(windows)'.dev-dependencies]
 mcom                = "0.1.4"
-thindx-xaudio2      = "0.0.0-2022-11-19"
-winresult           = "0.1" # required to use thindx-xaudio2 but it shouldn't be
+thindx-xaudio2      = "0.0.0-2023-04-17"
 winapi.version      = "0.3"
 winapi.features = [
     # um

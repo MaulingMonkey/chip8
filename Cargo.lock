@@ -91,7 +91,6 @@ dependencies = [
  "rand",
  "thindx-xaudio2",
  "winapi",
- "winresult",
 ]
 
 [[package]]
@@ -207,9 +206,9 @@ dependencies = [
 
 [[package]]
 name = "thindx-xaudio2"
-version = "0.0.0-2022-11-19"
+version = "0.0.0-2023-04-17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e67652fdb334e604a6b7f434d7d989e454d3cfb4a247cea34aa8e544524ad6f"
+checksum = "e451d0a60e4f398b183934a1626694db8870dee858cef64f8c40f51bc4f85211"
 dependencies = [
  "abibool",
  "abistr",
