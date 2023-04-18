@@ -114,13 +114,6 @@ fn main() {
     struct VoiceCallback;
     impl xaudio2::VoiceCallback for VoiceCallback {
         type BufferContext = ();
-        // As expected, these callbacks all fire on an XAudio2 thread:
-        fn on_voice_processing_pass_start(&self, _bytes_required: u32) {}
-        fn on_voice_processing_pass_end(&self) {}
-        fn on_loop_end(&self, _buffer_context: &Self::BufferContext) {}
-        fn on_buffer_start(&self, _buffer_context: &Self::BufferContext) {}
-        fn on_buffer_end(&self, _buffer_context: Self::BufferContext) {}
-        fn on_stream_end(&self) {}
         fn on_voice_error(&self, _buffer_context: &Self::BufferContext, error: winresult::HResult) { panic!("{error:?}"); }
     }
 }
