@@ -1,3 +1,4 @@
+/// Platform specific code, in one convenient trait.
 pub trait Syscalls {
     #[cfg(not(feature = "default-syscalls"))]   fn rand(&self) -> u8;
     #[cfg(feature = "default-syscalls")]        fn rand(&self) -> u8 { rand::random() }
