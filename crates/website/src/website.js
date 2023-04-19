@@ -18,12 +18,7 @@ const ERRNO = {
     NOSYS:      52, // function not supported
 };
 
-let wasmUrl = "website.wasm";
-switch (new URLSearchParams(location.search).get("target")) {
-    case "debug":   wasmUrl = "../../../target/wasm32-wasi/debug/maulingmonkey_chip8_website.wasm"; break;
-    case "release": wasmUrl = "../../../target/wasm32-wasi/release/maulingmonkey_chip8_website.wasm"; break;
-}
-const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), {
+const imports = {
     chip8: {
         get_key: function chip8_get_key() {
             for (let i=0; i<16; ++i) {
@@ -109,7 +104,14 @@ const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), {
         }
     },
     // TODO: other imports?
-});
+};
+
+let wasmUrl = "website.wasm";
+switch (new URLSearchParams(location.search).get("target")) {
+    case "debug":   wasmUrl = "../../../target/wasm32-wasi/debug/maulingmonkey_chip8_website.wasm"; break;
+    case "release": wasmUrl = "../../../target/wasm32-wasi/release/maulingmonkey_chip8_website.wasm"; break;
+}
+const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), imports);
 
 addEventListener("load", async function on_chip8_load() {
     const canvas = document.getElementsByTagName("canvas")[0];
