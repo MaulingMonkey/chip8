@@ -2,6 +2,10 @@
 let raf_handle = undefined;
 let memory = new WebAssembly.Memory({ initial: 2 });
 
+const audio = new AudioContext();
+let tone = undefined;
+"keydown keypress click mousedown".split(' ').forEach(e => addEventListener(e, function(ev) { console.log(ev.type); audio.resume(); }));
+
 const ERRNO = {
     SUCCESS:    0,
     BADF:       8,  // bad file descriptor
@@ -15,6 +19,27 @@ switch (new URLSearchParams(location.search).get("target")) {
     case "release": wasmUrl = "../../../target/wasm32-wasi/release/maulingmonkey_chip8_website.wasm"; break;
 }
 const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), {
+    chip8: {
+        get_key: function chip8_get_key() {
+            return 0xFFFFFFFF; // no key held
+        },
+        /** @param {number} key */
+        is_pressed: function chip8_is_pressed(key) {
+            return 0;
+        },
+        sound_play: function chip8_sound_play() {
+            if (tone) return; // XXX: should never happen?
+            tone = audio.createOscillator();
+            tone.type = "sine";
+            tone.frequency.value = 440; // https://en.wikipedia.org/wiki/A440_(pitch_standard)
+            tone.connect(audio.destination);
+            tone.start();
+        },
+        sound_stop: function chip8_sound_play() {
+            tone?.stop();
+            tone = undefined;
+        },
+    },
     console: {
         error: function console_error(start, len) {
             const view = new DataView(memory.buffer, start, len);

@@ -1,14 +1,40 @@
+#![cfg(target_arch = "wasm32")]
+
 use maulingmonkey_chip8_interpreter::*;
-type Context = maulingmonkey_chip8_interpreter::Context<()>;
 
 use core::cell::RefCell;
 use std::cell::RefMut;
 
 
 
+#[derive(Default)] struct Website;
+impl Syscalls for Website {
+    fn get_key(&self) -> Option<u8> {
+        #[link(wasm_import_module = "chip8")] extern "C" { fn get_key() -> u32; }
+        unsafe { get_key() }.try_into().ok()
+    }
+
+    fn is_pressed(&self, _key: u8) -> bool {
+        #[link(wasm_import_module = "chip8")] extern "C" { fn is_pressed() -> u32; }
+        0 != unsafe { is_pressed() }
+    }
+
+    fn sound_play(&self) {
+        #[link(wasm_import_module = "chip8")] extern "C" { fn sound_play(); }
+        unsafe { sound_play() }
+    }
+
+    fn sound_stop(&self) {
+        #[link(wasm_import_module = "chip8")] extern "C" { fn sound_stop(); }
+        unsafe { sound_stop() }
+    }
+}
+
+
+
 thread_local! {
-    static CONTEXT : &'static RefCell<Context> = Box::leak(Box::new(Default::default()));
-    static CONTEXT_LOCK : RefCell<Option<RefMut<'static, Context>>> = Default::default();
+    static CONTEXT : &'static RefCell<Context<Website>> = Box::leak(Box::new(Default::default()));
+    static CONTEXT_LOCK : RefCell<Option<RefMut<'static, Context<Website>>>> = Default::default();
 }
 
 #[cfg(target_arch = "wasm32")] mod console {
@@ -38,7 +64,7 @@ thread_local! {
 
 #[no_mangle] pub extern "C" fn lock_memory_range(start: usize, end: usize) -> usize {
     CONTEXT_LOCK.with(|lock| CONTEXT.with(|context| {
-        #[cfg(debug_assertions)] #[cfg(target_arch = "wasm32")] console::log(format!("lock_memory_range({start}, {end})"));
+        //#[cfg(debug_assertions)] #[cfg(target_arch = "wasm32")] console::log(format!("lock_memory_range({start}, {end})"));
         assert!(lock.borrow().is_none(), "lock_memory_range({start} .. {end}) called, but memory was already locked");
         let mut ref_mut = context.borrow_mut();
         let ptr = ref_mut.memory.as_bytes_mut()[start..end].as_mut_ptr() as usize;
@@ -48,7 +74,7 @@ thread_local! {
 }
 
 #[no_mangle] pub extern "C" fn unlock_memory_range() {
-    #[cfg(debug_assertions)] #[cfg(target_arch = "wasm32")] console::log(format!("unlock_memory_range()"));
+    //#[cfg(debug_assertions)] #[cfg(target_arch = "wasm32")] console::log(format!("unlock_memory_range()"));
     CONTEXT_LOCK.with(|lock| {
         assert!(lock.borrow().is_some(), "unlock_memory_range() called, but no memory range was locked");
         *lock.borrow_mut() = None;
@@ -65,7 +91,7 @@ thread_local! {
 
 
 #[no_mangle] pub extern "C" fn context_reset() {
-    let mut ctx = Context::new();
+    let mut ctx = Context::<Website>::new();
     ctx.registers.pc = Addr::PROGRAM_START_TYPICAL;
     ctx.memory.copy_from_slice(Addr::SYSTEM_INTERPRETER_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
     ctx.memory.copy_from_slice(ctx.registers.pc, include_bytes!("../../../examples/sierpinski.ch8")).expect("failed to copy sierpinski.ch8 ROM into memory");
