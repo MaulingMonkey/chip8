@@ -102,7 +102,7 @@
             "request":                  "launch",
             "preLaunchTask":            "start server • release",
             "postDebugTask":            "stop server",
-            "url":                      "http://127.0.0.99:9001/crates/website/src/website.html?target=debug",
+            "url":                      "http://127.0.0.99:9001/crates/website/src/website.html?target=release",
             "webRoot":                  "${workspaceFolder}",
         },
     ]
