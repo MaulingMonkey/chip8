@@ -6,6 +6,11 @@ const audio = new AudioContext();
 let tone = undefined;
 "keydown keypress click mousedown".split(' ').forEach(e => addEventListener(e, function(ev) { console.log(ev.type); audio.resume(); }));
 
+const keyboard = { codes: {} };
+addEventListener("keydown", function(ev) { keyboard.codes[ev.code] = true; });
+addEventListener("keyup",   function(ev) { delete keyboard.codes[ev.code]; });
+addEventListener("blur",    function(ev) { keyboard.codes = {}; });
+
 const ERRNO = {
     SUCCESS:    0,
     BADF:       8,  // bad file descriptor
@@ -21,11 +26,21 @@ switch (new URLSearchParams(location.search).get("target")) {
 const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), {
     chip8: {
         get_key: function chip8_get_key() {
+            for (let i=0; i<16; ++i) {
+                const key = "X123QWEASDZC4RFV"[i];
+                if (keyboard[key] || keyboard[`Key${key}`]) return i;
+            }
             return 0xFFFFFFFF; // no key held
         },
         /** @param {number} key */
-        is_pressed: function chip8_is_pressed(key) {
-            return 0;
+        is_pressed: function chip8_is_pressed(i) {
+            // Typical CHIP-8 keyboard layout: https://www.google.com/search?q=chip8+keyboard+layout&tbm=isch
+            // 1 2 3 C
+            // 4 5 6 D
+            // 7 8 9 E
+            // A 0 B F
+            const key = "X123QWEASDZC4RFV"[i];
+            return (keyboard[key] || keyboard[`Key${key}`]) ? 1 : 0;
         },
         sound_play: function chip8_sound_play() {
             if (tone) return; // XXX: should never happen?
