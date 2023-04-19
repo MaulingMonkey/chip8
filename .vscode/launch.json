@@ -93,14 +93,8 @@
             "request":                  "launch",
             "preLaunchTask":            "start server • debug",
             "postDebugTask":            "stop server",
-            "url":                      "http://127.0.0.99:9001/",
-            "webRoot":                  "${workspaceFolder}/target/wasm32-wasi/debug",
-            "sourceMapRenames": true,
-            "sourceMapPathOverrides": {
-                "http://127.0.0.99:9001/":              "${workspaceFolder}/crates/website/src/website.html",
-                "http://127.0.0.99:9001/(index)":       "${workspaceFolder}/crates/website/src/website.html",
-                "http://127.0.0.99:9001/index.html":    "${workspaceFolder}/crates/website/src/website.html",
-            },
+            "url":                      "http://127.0.0.99:9001/crates/website/src/website.html?target=debug",
+            "webRoot":                  "${workspaceFolder}",
         },
         {
             "name":                     "chrome • release",
@@ -108,14 +102,8 @@
             "request":                  "launch",
             "preLaunchTask":            "start server • release",
             "postDebugTask":            "stop server",
-            "url":                      "http://127.0.0.99:9001/",
-            "webRoot":                  "${workspaceFolder}/target/wasm32-wasi/release",
-            "sourceMapRenames": true,
-            "sourceMapPathOverrides": {
-                "http://127.0.0.99:9001/":              "${workspaceFolder}/crates/website/src/website.html",
-                "http://127.0.0.99:9001/(index)":       "${workspaceFolder}/crates/website/src/website.html",
-                "http://127.0.0.99:9001/index.html":    "${workspaceFolder}/crates/website/src/website.html",
-            },
+            "url":                      "http://127.0.0.99:9001/crates/website/src/website.html?target=debug",
+            "webRoot":                  "${workspaceFolder}",
         },
     ]
 }

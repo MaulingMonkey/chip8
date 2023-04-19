@@ -14,6 +14,3 @@ path                = "src/website.rs"
 maulingmonkey-chip8-interpreter.path = "../interpreter"
 bytemuck.version    = "1"
 bytemuck.features   = ["derive"]
-
-[build-dependencies]
-mmrbi               = "0.0.19"

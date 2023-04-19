@@ -70,12 +70,12 @@
         },
         {
             "label":            "start server • debug",
-            "windows":          { "command": "start \"mmuhttpd•chip8\" mmuhttpd target/wasm32-wasi/debug" },
+            "windows":          { "command": "start \"mmuhttpd•chip8\" mmuhttpd" },
             "dependsOn":        ["stop server", "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi"],
         },
         {
             "label":            "start server • release",
-            "windows":          { "command": "start \"mmuhttpd•chip8\" mmuhttpd target/wasm32-wasi/release" },
+            "windows":          { "command": "start \"mmuhttpd•chip8\" mmuhttpd" },
             "dependsOn":        ["stop server", "cargo build --package maulingmonkey-chip8-website --lib --target=wasm32-wasi --release"],
         },
         {

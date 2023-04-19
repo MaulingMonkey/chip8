@@ -28,12 +28,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8aeb952f369a5255b28bd4d57984d84edc2d3b5ee72c93427b47b703e1df8e15"
 
 [[package]]
-name = "alphanumeric-sort"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0e75706f4ee4c69aaa277f73a7a6ad60222193938d4266b929aacd17ebb29b9"
-
-[[package]]
 name = "bytemuck"
 version = "1.13.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -99,7 +93,6 @@ version = "0.0.0-git"
 dependencies = [
  "bytemuck",
  "maulingmonkey-chip8-interpreter",
- "mmrbi",
 ]
 
 [[package]]
@@ -116,16 +109,6 @@ name = "minidl"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "87d3d8666e5ed22230c0096edcccf7097905b1e2975869e1b9fe5df40d26d801"
-
-[[package]]
-name = "mmrbi"
-version = "0.0.19"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "058c8fa8016094e210ded0db786a733399f5a1a41ba28ea792ea544e807dd905"
-dependencies = [
- "alphanumeric-sort",
- "lazy_static",
-]
 
 [[package]]
 name = "nonmax"

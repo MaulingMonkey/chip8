@@ -9,7 +9,12 @@ const ERRNO = {
     NOSYS:      52, // function not supported
 };
 
-const wasm = WebAssembly.instantiateStreaming(fetch("maulingmonkey_chip8_website.wasm"), {
+let wasmUrl = "website.wasm";
+switch (new URLSearchParams(location.search).get("target")) {
+    case "debug":   wasmUrl = "../../../target/wasm32-wasi/debug/maulingmonkey_chip8_website.wasm"; break;
+    case "release": wasmUrl = "../../../target/wasm32-wasi/release/maulingmonkey_chip8_website.wasm"; break;
+}
+const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), {
     console: {
         error: function console_error(start, len) {
             const view = new DataView(memory.buffer, start, len);
