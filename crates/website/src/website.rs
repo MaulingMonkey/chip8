@@ -37,7 +37,7 @@ thread_local! {
     static CONTEXT_LOCK : RefCell<Option<RefMut<'static, Context<Website>>>> = Default::default();
 }
 
-#[cfg(target_arch = "wasm32")] mod console {
+#[cfg(target_arch = "wasm32")] #[allow(dead_code)] mod console {
     #[link(wasm_import_module = "console")] extern "C" {
         #[link_name = "log"     ] fn ffi_log(msg: usize, len: usize);
         #[link_name = "panic"   ] fn ffi_panic(msg: usize, len: usize);
