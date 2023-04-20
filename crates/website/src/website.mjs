@@ -26,7 +26,7 @@ switch (new URLSearchParams(location.search).get("target")) {
 }
 const wasm = WebAssembly.instantiateStreaming(fetch(wasmUrl), imports);
 
-async function on_chip8_load() {
+async function on_load() {
     const canvas = document.getElementsByTagName("canvas")[0];
     const framebuffer = new ImageData(64, 32);
     Object.assign(ctx, await wasm); // ctx.module, ctx.instance
@@ -59,7 +59,51 @@ async function on_chip8_load() {
         ctx.instance.exports.context_try_step_many(500/60); // 500 Hz target
         ctx.instance.exports.context_step_clocks(1);
     }, 1000/60);
+
+    /** @param {ArrayBuffer} arrayBuffer */
+    function open_rom(arrayBuffer) {
+        const rom = new Uint8Array(arrayBuffer);
+
+        const ROM_START = 0x200;
+        const ROM_END   = 0xF00;
+        const ROM_MAX   = ROM_END - ROM_START;
+
+        if (rom.length > ROM_MAX) {
+            window.alert(`ROM too large to fit into CHIP-8 program memory (${rom.length} > ${ROM_MAX} bytes @ 0x200 .. 0xF00)`);
+            return;
+        }
+
+        ctx.instance.exports.context_reset();
+        try {
+            const dst_start = ctx.instance.exports.lock_memory_range(ROM_START, ROM_END);
+            const dst       = new Uint8Array(ctx.memory.buffer, dst_start, ROM_MAX);
+            const n = Math.min(rom.length, dst.length);
+            for (let i=0; i<n; ++i) dst[i] = rom[i];
+        } finally {
+            ctx.instance.exports.unlock_memory_range();
+        }
+    }
+
+    [...document.getElementsByTagName("input")].forEach(function (input){
+        if (input.type === "file" && input.dataset.action === "open-local") {
+            input.style.cursor = "pointer";
+            input.addEventListener("input", async function() {
+                const file = input.files?.[0];
+                if (file) open_rom(await file.arrayBuffer())
+            });
+            return;
+        }
+    });
+
+    [...document.getElementsByTagName("button")].forEach(function (button){
+        const run = button.dataset.run;
+        if (run) {
+            button.style.cursor = "pointer";
+            button.addEventListener("click", async() => open_rom(await (await fetch(run)).arrayBuffer()));
+            return;
+        }
+    });
 }
 
-if (document.readyState === "complete") on_chip8_load();
-else addEventListener("load", on_chip8_load);
+if (document.readyState === "complete") on_load();
+else addEventListener("load", on_load);
