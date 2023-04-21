@@ -2,7 +2,7 @@
 
 const audio = new AudioContext();
 let tone = undefined;
-"keydown keypress click mousedown".split(' ').forEach(e => addEventListener(e, function(ev) { console.log(ev.type); audio.resume(); }));
+"keydown keypress click mousedown".split(' ').forEach(e => addEventListener(e, function(ev) { audio.resume(); }));
 
 export function sound_play() {
     if (tone) return; // XXX: should never happen?
