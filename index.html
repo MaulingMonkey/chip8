@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en-US"><head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>MaulingMonkey's CHIP-8 Interpreter</title>
+    <script src="website.mjs" type="module"></script>
+    <style>
+        body {
+            --scale:            8;
+        }
+
+        canvas {
+            display:            block;
+            image-rendering:    pixelated;
+            width:              calc(var(--scale) * 64px);
+            height:             calc(var(--scale) * 32px);
+        }
+
+        .centered {
+            position:           absolute;
+            top:                50%;
+            left:               50%;
+            transform:          translate(-50%, -50%);
+
+            color:              white;
+            background-color:   black;
+            border:             1px solid black;
+            border-width:       calc(var(--scale) * 1px);
+            border-radius:      calc(var(--scale) * 0.7px);
+        }
+
+        .centered > *               { display: block; margin-top: calc(var(--scale) * 1px); }
+        .centered > *:first-child   { margin: 0; }
+    </style>
+</head><body>
+    <div class="centered">
+        <canvas width="64" height="32"></canvas>
+        <input data-action="open-local" type="file" accept=".ch8">
+        <button data-run="/examples/sierpinski.ch8">Run /examples/sierpinski.ch8</button>
+    </div>
+</body></html>
