@@ -31,11 +31,17 @@
 
         .centered > *               { display: block; margin-top: calc(var(--scale) * 1px); }
         .centered > *:first-child   { margin: 0; }
+        .centered a                 { color: white; }
+        .centered a:visited         { color: white; }
     </style>
 </head><body>
     <div class="centered">
         <canvas width="64" height="32"></canvas>
         <input data-action="open-local" type="file" accept=".ch8">
-        <button data-run="/examples/sierpinski.ch8">Run /examples/sierpinski.ch8</button>
+        <button data-run="examples/sierpinski.ch8">Run examples/sierpinski.ch8</button>
+        <div>
+            <a href="about.html">About/Licenses</a>,
+            <a href="https://github.com/MaulingMonkey/chip8">Repository</a>
+        </div>
     </div>
 </body></html>
