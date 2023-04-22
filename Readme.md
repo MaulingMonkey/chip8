@@ -1,6 +1,6 @@
 # MaulingMonkey/chip8
 
-[CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) hardware has 16-bit registers, 16-bit fixed-width instructions, and - typically - 4K memory.
+[CHIP-8](https://en.wikipedia.org/wiki/CHIP-8) hardware has 8-bit registers, 16-bit fixed-width instructions, and - typically - 4K memory.
 This repository is meant to be MaulingMonkey's collection of CHIP-8-related experiments (Interpreters, VMs, JITs, Compilers, Debuggers, ...)
 
 
