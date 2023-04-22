@@ -6,10 +6,7 @@ addEventListener("keyup",   function(ev) { delete codes[ev.code]; });
 addEventListener("blur",    function(ev) { codes = {}; });
 
 export function get_key() {
-    for (let i=0; i<16; ++i) {
-        const key = "X123QWEASDZC4RFV"[i];
-        if (codes[key] || codes[`Key${key}`]) return i;
-    }
+    for (let i=0; i<16; ++i) if (is_pressed(i)) return i;
     return 0xFFFFFFFF; // no key held
 }
 
