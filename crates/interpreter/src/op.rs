@@ -28,11 +28,11 @@ impl Debug for Op {
             fn bitor_v_v            (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} | {vy}") }
             fn bitand_v_v           (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} & {vy}") }
             fn bitxor_v_v           (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} ^ {vy}") }
-            fn add_v_v              (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} + {vy}") }
-            fn sub_v_v              (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} - {vy}") }
-            fn shr1_v               (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} >> 1 ; {vy}") }
-            fn sub_v_v_alt          (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vy} - {vx}") }
-            fn shl1_v               (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "{vx} <- {vx} << 1 ; {vy}") }
+            fn add_v_v              (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "({vx}, VF) <- ({vx} + {vy}, carry)") }
+            fn sub_v_v              (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "({vx}, VF) <- ({vx} - {vy}, borrow)") }
+            fn shr1_v               (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "({vx}, VF) <- ({vy} >> 1, {vy} & 0x01 != 0)") }
+            fn sub_v_v_alt          (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "({vx}, VF) <- ({vy} - {vx}, borrow)") }
+            fn shl1_v               (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "({vx}, VF) <- ({vy} << 1, {vy} & 0x80 != 0)") }
             fn skip_if_v_ne_v       (&mut self, vx: V, vy: V)               -> Self::Result { write!(self.0, "skip_if {vx} != {vy}") }
             fn set_i_c              (&mut self, c: Addr)                    -> Self::Result { write!(self.0, "i <- {c}") }
             fn set_pc_v0_plus_c     (&mut self, _v0: (), c: Addr)           -> Self::Result { write!(self.0, "pc <- V0 + {c}") }
@@ -74,17 +74,17 @@ impl Debug for Op {
     assert_eq!(format!("{:?}", Op(0x8321)), "V3 <- V3 | V2");
     assert_eq!(format!("{:?}", Op(0x8432)), "V4 <- V4 & V3");
     assert_eq!(format!("{:?}", Op(0x8543)), "V5 <- V5 ^ V4");
-    assert_eq!(format!("{:?}", Op(0x8654)), "V6 <- V6 + V5");
-    assert_eq!(format!("{:?}", Op(0x8765)), "V7 <- V7 - V6");
-    assert_eq!(format!("{:?}", Op(0x8876)), "V8 <- V8 >> 1 ; V7");
-    assert_eq!(format!("{:?}", Op(0x8987)), "V9 <- V8 - V9");
+    assert_eq!(format!("{:?}", Op(0x8654)), "(V6, VF) <- (V6 + V5, carry)");
+    assert_eq!(format!("{:?}", Op(0x8765)), "(V7, VF) <- (V7 - V6, borrow)");
+    assert_eq!(format!("{:?}", Op(0x8876)), "(V8, VF) <- (V7 >> 1, V7 & 0x01 != 0)");
+    assert_eq!(format!("{:?}", Op(0x8987)), "(V9, VF) <- (V8 - V9, borrow)");
     assert_eq!(format!("{:?}", Op(0x8678)), "invalid ; 0x8678");
     assert_eq!(format!("{:?}", Op(0x8789)), "invalid ; 0x8789");
     assert_eq!(format!("{:?}", Op(0x889A)), "invalid ; 0x889A");
     assert_eq!(format!("{:?}", Op(0x89AB)), "invalid ; 0x89AB");
     assert_eq!(format!("{:?}", Op(0x8ABC)), "invalid ; 0x8ABC");
     assert_eq!(format!("{:?}", Op(0x8BCD)), "invalid ; 0x8BCD");
-    assert_eq!(format!("{:?}", Op(0x8CDE)), "VC <- VC << 1 ; VD");
+    assert_eq!(format!("{:?}", Op(0x8CDE)), "(VC, VF) <- (VD << 1, VD & 0x80 != 0)");
     assert_eq!(format!("{:?}", Op(0x8DEF)), "invalid ; 0x8DEF");
 
     assert_eq!(format!("{:?}", Op(0x9210)), "skip_if V2 != V1");
