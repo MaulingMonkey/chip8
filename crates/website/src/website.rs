@@ -14,9 +14,9 @@ impl Syscalls for Website {
         unsafe { get_key() }.try_into().ok()
     }
 
-    fn is_pressed(&self, _key: u8) -> bool {
-        #[link(wasm_import_module = "chip8")] extern "C" { fn is_pressed() -> u32; }
-        0 != unsafe { is_pressed() }
+    fn is_pressed(&self, key: u8) -> bool {
+        #[link(wasm_import_module = "chip8")] extern "C" { fn is_pressed(key: u32) -> u32; }
+        0 != unsafe { is_pressed(key.into()) }
     }
 
     fn sound_play(&self) {
