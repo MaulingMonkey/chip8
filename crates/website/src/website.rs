@@ -96,7 +96,11 @@ thread_local! {
     ctx.memory.copy_from_slice(Addr::SYSTEM_INTERPRETER_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
     ctx.memory.copy_from_slice(ctx.registers.pc, include_bytes!("../../../examples/sierpinski.ch8")).expect("failed to copy sierpinski.ch8 ROM into memory");
 
-    CONTEXT.with(|tls| *tls.borrow_mut() = ctx);
+    CONTEXT.with(|tls| {
+        let mut tls = tls.borrow_mut();
+        ctx.registers.sound_playing = tls.registers.sound_playing;
+        *tls = ctx;
+    });
 }
 
 #[no_mangle] pub extern "C" fn context_try_step_single() -> bool { CONTEXT.with(|tls| tls.borrow_mut().try_step_single()) }
