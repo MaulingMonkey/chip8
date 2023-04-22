@@ -73,8 +73,8 @@ impl<S: Syscalls> Context<S> {
             #[inline(always)] fn add_i_v                (&mut self, v: V)                       -> Self::Result { self.0.registers.i.0 += u16::from(self.0.registers[v]); self.0.step() }
             #[inline(always)] fn set_i_sprite           (&mut self, v: V)                       -> Self::Result { self.0.registers.i.0 = Addr::SYSTEM_INTERPRETER_FONTS_START.0 + u16::from(self.0.registers[v]) * 5; self.0.step() }
             #[inline(always)] fn set_i_bcd              (&mut self, v: V)                       -> Self::Result { self.0.memory.copy_from_slice(self.0.registers.i, &bcd(self.0.registers[v])).map_or(false, |_| self.0.step()) }
-            #[inline(always)] fn reg_dump               (&mut self, v: V)                       -> Self::Result { for v in V::iter().take(v.0.to_usize()+1) { self.0.memory.write(Addr(self.0.registers.i.0 + v.0.to_u16()), self.0.registers[v]) } self.0.step() }
-            #[inline(always)] fn reg_load               (&mut self, v: V)                       -> Self::Result { for v in V::iter().take(v.0.to_usize()+1) { self.0.registers[v] = self.0.memory.read(Addr(self.0.registers.i.0 + v.0.to_u16())) } self.0.step() }
+            #[inline(always)] fn reg_dump               (&mut self, v: V)                       -> Self::Result { for v in V::iter().take(v.0.to_usize()+1) { self.0.memory.write(Addr(self.0.registers.i.0 + v.0.to_u16()), self.0.registers[v]) } self.0.registers.i.0 += v.0.to_u16(); self.0.step() }
+            #[inline(always)] fn reg_load               (&mut self, v: V)                       -> Self::Result { for v in V::iter().take(v.0.to_usize()+1) { self.0.registers[v] = self.0.memory.read(Addr(self.0.registers.i.0 + v.0.to_u16())) } self.0.registers.i.0 += v.0.to_u16(); self.0.step() }
         }
     }
 
