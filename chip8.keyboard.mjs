@@ -8,7 +8,7 @@ addEventListener("blur",    function(ev) { codes = {}; });
 export function get_key() {
     for (let i=0; i<16; ++i) {
         const key = "X123QWEASDZC4RFV"[i];
-        if (keyboard[key] || keyboard[`Key${key}`]) return i;
+        if (codes[key] || codes[`Key${key}`]) return i;
     }
     return 0xFFFFFFFF; // no key held
 }
@@ -21,5 +21,5 @@ export function is_pressed(i) {
     // 7 8 9 E
     // A 0 B F
     const key = "X123QWEASDZC4RFV"[i];
-    return (keyboard[key] || keyboard[`Key${key}`]) ? 1 : 0;
+    return (codes[key] || codes[`Key${key}`]) ? 1 : 0;
 }
