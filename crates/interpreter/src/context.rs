@@ -27,30 +27,134 @@ impl<S: Syscalls> Context<S> {
         #[repr(transparent)] struct Step<'a, S: Syscalls>(&'a mut Context<S>);
         impl<S: Syscalls> Decode for Step<'_, S> {
             type Result = bool;
-            #[inline(always)] fn invalid                (&mut self, op: u16)                    -> Self::Result { panic!("invalid instruction: 0x{op:04x} @ {}", self.0.registers.pc) }
-            #[inline(always)] fn call_mcs               (&mut self, addr: Addr)                 -> Self::Result { panic!("invalid mcs call: {addr} @ {}", self.0.registers.pc) }
-            #[inline(always)] fn display_clear          (&mut self)                             -> Self::Result { self.0.screen().clear(); self.0.step() }
-            #[inline(always)] fn flow_return            (&mut self)                             -> Self::Result { self.0.registers.pc = self.0.registers.stack.pop().expect("return without any stack"); true }
-            #[inline(always)] fn flow_goto              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.pc = addr; true }
-            #[inline(always)] fn flow_call              (&mut self, addr: Addr)                 -> Self::Result { self.0.registers.stack.push(Addr(self.0.registers.pc.0 + 2)); self.0.registers.pc = addr; true }
-            #[inline(always)] fn skip_if_v_eq_c         (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_skip_if(self.0.registers[v] == c) }
-            #[inline(always)] fn skip_if_v_ne_c         (&mut self, v: V, c: u8)                -> Self::Result { self.0.step_skip_if(self.0.registers[v] != c) }
-            #[inline(always)] fn skip_if_v_eq_v         (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_skip_if(self.0.registers[vx] == self.0.registers[vy]) }
-            #[inline(always)] fn set_v_c                (&mut self, vx: V, c: u8)               -> Self::Result { self.0.registers[vx] =  c; self.0.step() }
-            #[inline(always)] fn add_v_c                (&mut self, vx: V, c: u8)               -> Self::Result { self.0.registers[vx] =  self.0.registers[vx].wrapping_add(c); self.0.step() }
-            #[inline(always)] fn set_v_v                (&mut self, vx: V, vy: V)               -> Self::Result { self.0.registers[vx] =  self.0.registers[vy]; self.0.step() }
-            #[inline(always)] fn bitor_v_v              (&mut self, vx: V, vy: V)               -> Self::Result { self.0.registers[vx] |= self.0.registers[vy]; self.0.step() }
-            #[inline(always)] fn bitand_v_v             (&mut self, vx: V, vy: V)               -> Self::Result { self.0.registers[vx] &= self.0.registers[vy]; self.0.step() }
-            #[inline(always)] fn bitxor_v_v             (&mut self, vx: V, vy: V)               -> Self::Result { self.0.registers[vx] ^= self.0.registers[vy]; self.0.step() }
-            #[inline(always)] fn add_v_v                (&mut self, vx: V, vy: V)               -> Self::Result { let (x, y) = (self.0.registers[vx], self.0.registers[vy]); self.0.registers[VF] = x.checked_add(y).is_none().into(); self.0.registers[vx] = x.wrapping_add(y); self.0.step() }
-            #[inline(always)] fn sub_v_v                (&mut self, vx: V, vy: V)               -> Self::Result { let (x, y) = (self.0.registers[vx], self.0.registers[vy]); self.0.registers[VF] = x.checked_sub(y).is_none().into(); self.0.registers[vx] = x.wrapping_sub(y); self.0.step() }
-            #[inline(always)] fn shr1_v                 (&mut self, vx: V, vy: V)               -> Self::Result { let y = self.0.registers[vy]; let carry = y & 0x01; self.0.registers[vx] = y >> 1; self.0.registers[VF] = carry; self.0.step() }
-            #[inline(always)] fn sub_v_v_alt            (&mut self, vx: V, vy: V)               -> Self::Result { let (x, y) = (self.0.registers[vx], self.0.registers[vy]); self.0.registers[VF] = y.checked_sub(x).is_none().into(); self.0.registers[vx] = y.wrapping_sub(x); self.0.step() }
-            #[inline(always)] fn shl1_v                 (&mut self, vx: V, vy: V)               -> Self::Result { let y = self.0.registers[vy]; let carry = y & 0x80; self.0.registers[vx] = y << 1; self.0.registers[VF] = carry; self.0.step() }
-            #[inline(always)] fn skip_if_v_ne_v         (&mut self, vx: V, vy: V)               -> Self::Result { self.0.step_skip_if(self.0.registers[vx] != self.0.registers[vy]) }
-            #[inline(always)] fn set_i_c                (&mut self, c: Addr)                    -> Self::Result { self.0.registers.i = c; self.0.step() }
-            #[inline(always)] fn set_pc_v0_plus_c       (&mut self, _v0: (), c: Addr)           -> Self::Result { self.0.registers.pc = Addr((u16::from(self.0.registers[V0]) + c.0) & 0xFFF); true } // XXX: overflow?
-            #[inline(always)] fn set_v_rand_mask        (&mut self, v: V, mask: u8)             -> Self::Result { self.0.registers[v] = self.0.syscalls.rand() & mask; self.0.step() }
+
+            #[inline(always)] fn invalid(&mut self, op: u16) -> Self::Result {
+                panic!("invalid instruction: 0x{op:04x} @ {}", self.0.registers.pc)
+            }
+
+            #[inline(always)] fn call_mcs(&mut self, addr: Addr) -> Self::Result {
+                panic!("invalid mcs call: {addr} @ {}", self.0.registers.pc)
+            }
+
+            #[inline(always)] fn display_clear(&mut self) -> Self::Result {
+                self.0.screen().clear();
+                self.0.step()
+            }
+
+            #[inline(always)] fn flow_return(&mut self) -> Self::Result {
+                self.0.registers.pc = self.0.registers.stack.pop().expect("return without any stack");
+                true
+            }
+
+            #[inline(always)] fn flow_goto(&mut self, addr: Addr) -> Self::Result {
+                self.0.registers.pc = addr;
+                true
+            }
+
+            #[inline(always)] fn flow_call(&mut self, addr: Addr) -> Self::Result {
+                self.0.registers.stack.push(Addr(self.0.registers.pc.0 + 2));
+                self.0.registers.pc = addr;
+                true
+            }
+
+            #[inline(always)] fn skip_if_v_eq_c(&mut self, v: V, c: u8) -> Self::Result {
+                self.0.step_skip_if(self.0.registers[v] == c)
+            }
+
+            #[inline(always)] fn skip_if_v_ne_c(&mut self, v: V, c: u8) -> Self::Result {
+                self.0.step_skip_if(self.0.registers[v] != c)
+            }
+
+            #[inline(always)] fn skip_if_v_eq_v(&mut self, vx: V, vy: V) -> Self::Result {
+                self.0.step_skip_if(self.0.registers[vx] == self.0.registers[vy])
+            }
+
+            #[inline(always)] fn set_v_c(&mut self, vx: V, c: u8) -> Self::Result {
+                self.0.registers[vx] = c;
+                self.0.step()
+            }
+
+            #[inline(always)] fn add_v_c(&mut self, vx: V, c: u8) -> Self::Result {
+                self.0.registers[vx] = self.0.registers[vx].wrapping_add(c);
+                self.0.step()
+            }
+
+            #[inline(always)] fn set_v_v(&mut self, vx: V, vy: V) -> Self::Result {
+                self.0.registers[vx] = self.0.registers[vy];
+                self.0.step()
+            }
+
+            #[inline(always)] fn bitor_v_v(&mut self, vx: V, vy: V) -> Self::Result {
+                self.0.registers[vx] |= self.0.registers[vy];
+                self.0.step()
+            }
+
+            #[inline(always)] fn bitand_v_v(&mut self, vx: V, vy: V) -> Self::Result {
+                self.0.registers[vx] &= self.0.registers[vy];
+                self.0.step()
+            }
+
+            #[inline(always)] fn bitxor_v_v(&mut self, vx: V, vy: V) -> Self::Result {
+                self.0.registers[vx] ^= self.0.registers[vy];
+                self.0.step()
+            }
+
+            #[inline(always)] fn add_v_v(&mut self, vx: V, vy: V) -> Self::Result {
+                let (x, y) = (self.0.registers[vx], self.0.registers[vy]);
+                self.0.registers[VF] = x.checked_add(y).is_none().into();
+                self.0.registers[vx] = x.wrapping_add(y);
+                self.0.step()
+            }
+
+            #[inline(always)] fn sub_v_v(&mut self, vx: V, vy: V) -> Self::Result {
+                let (x, y) = (self.0.registers[vx], self.0.registers[vy]);
+                self.0.registers[VF] = x.checked_sub(y).is_none().into();
+                self.0.registers[vx] = x.wrapping_sub(y);
+                self.0.step()
+            }
+
+            #[inline(always)] fn shr1_v(&mut self, vx: V, vy: V) -> Self::Result {
+                let y = self.0.registers[vy];
+                let carry = y & 0x01;
+                self.0.registers[vx] = y >> 1;
+                self.0.registers[VF] = carry;
+                self.0.step()
+            }
+
+            #[inline(always)] fn sub_v_v_alt(&mut self, vx: V, vy: V) -> Self::Result {
+                let (x, y) = (self.0.registers[vx], self.0.registers[vy]);
+                self.0.registers[VF] = y.checked_sub(x).is_none().into();
+                self.0.registers[vx] = y.wrapping_sub(x);
+                self.0.step()
+            }
+
+            #[inline(always)] fn shl1_v(&mut self, vx: V, vy: V) -> Self::Result {
+                let y = self.0.registers[vy];
+                let carry = y & 0x80;
+                self.0.registers[vx] = y << 1;
+                self.0.registers[VF] = carry;
+                self.0.step()
+            }
+
+            #[inline(always)] fn skip_if_v_ne_v(&mut self, vx: V, vy: V) -> Self::Result {
+                self.0.step_skip_if(self.0.registers[vx] != self.0.registers[vy])
+            }
+
+            #[inline(always)] fn set_i_c(&mut self, c: Addr) -> Self::Result {
+                self.0.registers.i = c;
+                self.0.step()
+            }
+
+            #[inline(always)] fn set_pc_v0_plus_c(&mut self, _v0: (), c: Addr) -> Self::Result {
+                // XXX: overflow?
+                self.0.registers.pc = Addr((u16::from(self.0.registers[V0]) + c.0) & 0xFFF);
+                true
+            }
+
+            #[inline(always)] fn set_v_rand_mask(&mut self, v: V, mask: u8) -> Self::Result {
+                self.0.registers[v] = self.0.syscalls.rand() & mask;
+                self.0.step()
+            }
 
             #[inline(always)] fn draw_x_y_h(&mut self, vx: V, vy: V, h: Nibble) -> Self::Result {
                 let x = self.0.registers[vx];
@@ -64,17 +168,64 @@ impl<S: Syscalls> Context<S> {
                 self.0.step()
             }
 
-            #[inline(always)] fn skip_if_pressed        (&mut self, key: V)                     -> Self::Result { self.0.step_skip_if(self.0.syscalls.is_pressed(self.0.registers[key])) }
-            #[inline(always)] fn skip_unless_pressed    (&mut self, key: V)                     -> Self::Result { self.0.step_skip_if(self.0.syscalls.is_pressed(self.0.registers[key])) }
-            #[inline(always)] fn get_delay_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers[v] = self.0.registers.delay_timer; self.0.step() }
-            #[inline(always)] fn await_key              (&mut self, v: V)                       -> Self::Result { let Some(key) = self.0.syscalls.get_key() else { return false }; self.0.registers[v] = key; self.0.step() }
-            #[inline(always)] fn set_delay_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers.delay_timer = self.0.registers[v]; self.0.step() }
-            #[inline(always)] fn set_sound_timer        (&mut self, v: V)                       -> Self::Result { self.0.registers.sound_timer = self.0.registers[v]; self.0.step() }
-            #[inline(always)] fn add_i_v                (&mut self, v: V)                       -> Self::Result { self.0.registers.i.0 += u16::from(self.0.registers[v]); self.0.step() }
-            #[inline(always)] fn set_i_sprite           (&mut self, v: V)                       -> Self::Result { self.0.registers.i.0 = Addr::SYSTEM_INTERPRETER_FONTS_START.0 + u16::from(self.0.registers[v]) * 5; self.0.step() }
-            #[inline(always)] fn set_i_bcd              (&mut self, v: V)                       -> Self::Result { self.0.memory.copy_from_slice(self.0.registers.i, &bcd(self.0.registers[v])).map_or(false, |_| self.0.step()) }
-            #[inline(always)] fn reg_dump               (&mut self, v: V)                       -> Self::Result { for v in V::iter().take(v.0.to_usize()+1) { self.0.memory.write(Addr(self.0.registers.i.0 + v.0.to_u16()), self.0.registers[v]) } self.0.registers.i.0 += v.0.to_u16(); self.0.step() }
-            #[inline(always)] fn reg_load               (&mut self, v: V)                       -> Self::Result { for v in V::iter().take(v.0.to_usize()+1) { self.0.registers[v] = self.0.memory.read(Addr(self.0.registers.i.0 + v.0.to_u16())) } self.0.registers.i.0 += v.0.to_u16(); self.0.step() }
+            #[inline(always)] fn skip_if_pressed(&mut self, key: V) -> Self::Result {
+                self.0.step_skip_if(self.0.syscalls.is_pressed(self.0.registers[key]))
+            }
+
+            #[inline(always)] fn skip_unless_pressed(&mut self, key: V) -> Self::Result {
+                self.0.step_skip_if(self.0.syscalls.is_pressed(self.0.registers[key]))
+            }
+
+            #[inline(always)] fn get_delay_timer(&mut self, v: V) -> Self::Result {
+                self.0.registers[v] = self.0.registers.delay_timer;
+                self.0.step()
+            }
+
+            #[inline(always)] fn await_key(&mut self, v: V) -> Self::Result {
+                let Some(key) = self.0.syscalls.get_key() else { return false };
+                self.0.registers[v] = key;
+                self.0.step()
+            }
+
+            #[inline(always)] fn set_delay_timer(&mut self, v: V) -> Self::Result {
+                self.0.registers.delay_timer = self.0.registers[v];
+                self.0.step()
+            }
+
+            #[inline(always)] fn set_sound_timer(&mut self, v: V) -> Self::Result {
+                self.0.registers.sound_timer = self.0.registers[v];
+                self.0.step()
+            }
+
+            #[inline(always)] fn add_i_v(&mut self, v: V) -> Self::Result {
+                self.0.registers.i.0 += u16::from(self.0.registers[v]);
+                self.0.step()
+            }
+
+            #[inline(always)] fn set_i_sprite(&mut self, v: V) -> Self::Result {
+                self.0.registers.i.0 = Addr::SYSTEM_INTERPRETER_FONTS_START.0 + u16::from(self.0.registers[v]) * 5;
+                self.0.step()
+            }
+
+            #[inline(always)] fn set_i_bcd(&mut self, v: V) -> Self::Result {
+                self.0.memory.copy_from_slice(self.0.registers.i, &bcd(self.0.registers[v])).map_or(false, |_| self.0.step())
+            }
+
+            #[inline(always)] fn reg_dump(&mut self, v: V) -> Self::Result {
+                for v in V::iter().take(v.0.to_usize()+1) {
+                    self.0.memory.write(Addr(self.0.registers.i.0 + v.0.to_u16()), self.0.registers[v]);
+                }
+                self.0.registers.i.0 += v.0.to_u16();
+                self.0.step()
+            }
+
+            #[inline(always)] fn reg_load(&mut self, v: V) -> Self::Result {
+                for v in V::iter().take(v.0.to_usize()+1) {
+                    self.0.registers[v] = self.0.memory.read(Addr(self.0.registers.i.0 + v.0.to_u16()));
+                }
+                self.0.registers.i.0 += v.0.to_u16();
+                self.0.step()
+            }
         }
     }
 
