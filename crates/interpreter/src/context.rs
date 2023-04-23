@@ -130,7 +130,7 @@ impl<S: Syscalls> Context<S> {
 
             #[inline(always)] fn shl1_v(&mut self, vx: V, vy: V) -> Self::Result {
                 let y = self.0.registers[vy];
-                let carry = y & 0x80;
+                let carry = y >> 7;
                 self.0.registers[vx] = y << 1;
                 self.0.registers[VF] = carry;
                 self.0.step()
