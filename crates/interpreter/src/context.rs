@@ -99,40 +99,47 @@ impl<S: Syscalls> Context<S> {
                 self.0.step()
             }
 
+            // on Vx vs VF write order:
+            //
+            // > Note that all these instructions overwrite variable VF.
+            // > This is used to show the status of the carry bit, which is copied into the least significant bit of VF.
+            // > All other bits of VF will be set to 0.
+            // > This means, if you use VF as the VX argument, the result will be overwritten by the flag status.
+            //
+            // https://laurencescotford.com/chip-8-on-the-cosmac-vip-arithmetic-and-logic-instructions/
+
             #[inline(always)] fn add_v_v(&mut self, vx: V, vy: V) -> Self::Result {
                 let (x, y) = (self.0.registers[vx], self.0.registers[vy]);
-                self.0.registers[VF] = x.checked_add(y).is_none().into();
                 self.0.registers[vx] = x.wrapping_add(y);
+                self.0.registers[VF] = x.checked_add(y).is_none().into(); // carry
                 self.0.step()
             }
 
             #[inline(always)] fn sub_v_v(&mut self, vx: V, vy: V) -> Self::Result {
                 let (x, y) = (self.0.registers[vx], self.0.registers[vy]);
-                self.0.registers[VF] = x.checked_sub(y).is_none().into();
                 self.0.registers[vx] = x.wrapping_sub(y);
+                self.0.registers[VF] = x.checked_sub(y).is_none().into(); // borrow
                 self.0.step()
             }
 
             #[inline(always)] fn shr1_v(&mut self, vx: V, vy: V) -> Self::Result {
                 let y = self.0.registers[vy];
-                let carry = y & 0x01;
                 self.0.registers[vx] = y >> 1;
-                self.0.registers[VF] = carry;
+                self.0.registers[VF] = y & 0x01; // discarded bit
                 self.0.step()
             }
 
             #[inline(always)] fn sub_v_v_alt(&mut self, vx: V, vy: V) -> Self::Result {
                 let (x, y) = (self.0.registers[vx], self.0.registers[vy]);
-                self.0.registers[VF] = y.checked_sub(x).is_none().into();
                 self.0.registers[vx] = y.wrapping_sub(x);
+                self.0.registers[VF] = y.checked_sub(x).is_none().into(); // borrow
                 self.0.step()
             }
 
             #[inline(always)] fn shl1_v(&mut self, vx: V, vy: V) -> Self::Result {
                 let y = self.0.registers[vy];
-                let carry = y >> 7;
                 self.0.registers[vx] = y << 1;
-                self.0.registers[VF] = carry;
+                self.0.registers[VF] = y >> 7; // discarded bit
                 self.0.step()
             }
 
