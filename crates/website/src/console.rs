@@ -1,5 +1,4 @@
 #![cfg(target_arch = "wasm32")]
-#![allow(dead_code)]
 
 #[link(wasm_import_module = "console")] extern "C" {
     #[link_name = "error"   ] fn ffi_error( msg: *const u8, len: usize);
