@@ -203,7 +203,7 @@ impl<S: Syscalls> Context<S> {
             }
 
             #[inline(always)] fn set_i_sprite(&mut self, v: V) -> Self::Result {
-                self.0.registers.i.0 = Addr::SYSTEM_INTERPRETER_FONTS_START.0 + u16::from(self.0.registers[v]) * 5;
+                self.0.registers.i.0 = Addr::TYPICAL_FONTS_START.0 + u16::from(self.0.registers[v]) * 5;
                 self.0.step()
             }
 

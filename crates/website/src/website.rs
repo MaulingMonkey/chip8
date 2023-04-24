@@ -93,7 +93,7 @@ thread_local! {
 #[no_mangle] pub extern "C" fn context_reset() {
     let mut ctx = Context::<Website>::new();
     ctx.registers.pc = Addr::PROGRAM_START_TYPICAL;
-    ctx.memory.copy_from_slice(Addr::SYSTEM_INTERPRETER_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
+    ctx.memory.copy_from_slice(Addr::TYPICAL_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
     ctx.memory.copy_from_slice(ctx.registers.pc, include_bytes!("../../../examples/sierpinski.ch8")).expect("failed to copy sierpinski.ch8 ROM into memory");
 
     CONTEXT.with(|tls| {

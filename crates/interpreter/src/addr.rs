@@ -17,6 +17,11 @@ impl Addr {
     pub const SYSTEM_INTERPRETER_FONTS_START    : Addr = Addr(0x000);
     pub const SYSTEM_INTERPRETER_FONTS_END      : Addr = Addr(0x200);
 
+    // "For some reason, it’s become popular to put it at 050–09F, so you can follow that convention if you want."
+    // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#font
+    pub const TYPICAL_FONTS_START               : Addr = Addr(0x050);
+    pub const TYPICAL_FONTS_END                 : Addr = Addr(0x050);
+
     pub const PROGRAM_START_TYPICAL             : Addr = Addr(0x200);
     pub const PROGRAM_START_ETI_660             : Addr = Addr(0x600);
 

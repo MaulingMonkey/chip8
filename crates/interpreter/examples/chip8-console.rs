@@ -34,7 +34,7 @@ fn main() {
     };
     ctx.registers.pc = Addr::PROGRAM_START_TYPICAL;
     ctx.memory.copy_from_io(ctx.registers.pc, ch8io).expect("failed to copy ROM into memory");
-    ctx.memory.copy_from_slice(Addr::SYSTEM_INTERPRETER_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
+    ctx.memory.copy_from_slice(Addr::TYPICAL_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
 
     let start = Instant::now();
     let mut next_redraw = start;
