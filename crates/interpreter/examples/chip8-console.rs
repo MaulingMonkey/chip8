@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 
 static SOUND : AtomicBool = AtomicBool::new(false); // XXX: consider a channel instead
-struct Console;
+#[derive(Default)] struct Console;
 impl Syscalls for Console {
     fn get_key(&self) -> Option<u8> { None }
     fn is_pressed(&self, _key: u8) -> bool { false }
@@ -27,11 +27,7 @@ fn main() {
         eprintln!("warning: failed to spawn sound thread: {err:?}");
     }
 
-    let mut ctx = Context {
-        memory:     Default::default(),
-        registers:  Default::default(),
-        syscalls:   Console,
-    };
+    let mut ctx = Context::<Console>::default();
     ctx.registers.pc = Addr::PROGRAM_START_TYPICAL;
     ctx.memory.copy_from_io(ctx.registers.pc, ch8io).expect("failed to copy ROM into memory");
     ctx.memory.copy_from_slice(Addr::TYPICAL_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
