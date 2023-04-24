@@ -123,9 +123,15 @@ impl<S: Syscalls> Context<S> {
             }
 
             #[inline(always)] fn shr1_v(&mut self, vx: V, vy: V) -> Self::Result {
-                let y = self.0.registers[vy];
-                self.0.registers[vx] = y >> 1;
-                self.0.registers[VF] = y & 0x01; // discarded bit
+                // XXX: behavior depends on machine!
+                // COSMAC VIP:  src = VY (current behavior)
+                // CHIP-48:     src = VX
+                // SUPER-CHIP:  src = VX
+                // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#8xy6-and-8xye-shift
+
+                let src = self.0.registers[vy];
+                self.0.registers[vx] = src >> 1;
+                self.0.registers[VF] = src & 0x01; // discarded bit
                 self.0.step()
             }
 
@@ -137,9 +143,15 @@ impl<S: Syscalls> Context<S> {
             }
 
             #[inline(always)] fn shl1_v(&mut self, vx: V, vy: V) -> Self::Result {
-                let y = self.0.registers[vy];
-                self.0.registers[vx] = y << 1;
-                self.0.registers[VF] = y >> 7; // discarded bit
+                // XXX: behavior depends on machine!
+                // COSMAC VIP:  src = VY (current behavior)
+                // CHIP-48:     src = VX
+                // SUPER-CHIP:  src = VX
+                // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#8xy6-and-8xye-shift
+
+                let src = self.0.registers[vy];
+                self.0.registers[vx] = src << 1;
+                self.0.registers[VF] = src >> 7; // discarded bit
                 self.0.step()
             }
 
@@ -153,6 +165,12 @@ impl<S: Syscalls> Context<S> {
             }
 
             #[inline(always)] fn set_pc_v0_plus_c(&mut self, _v0: (), c: Addr) -> Self::Result {
+                // XXX: behavior depends on machine!
+                // COSMAC VIP:  pc = V0 + NNN   (current behavior)
+                // CHIP-48:     pc = VX + NNN
+                // SUPER-CHIP:  pc = VX + NNN
+                // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#bnnn-jump-with-offset
+
                 // XXX: overflow?
                 self.0.registers.pc = Addr((u16::from(self.0.registers[V0]) + c.0) & 0xFFF);
                 true
@@ -164,8 +182,13 @@ impl<S: Syscalls> Context<S> {
             }
 
             #[inline(always)] fn draw_x_y_h(&mut self, vx: V, vy: V, h: Nibble) -> Self::Result {
-                let x = self.0.registers[vx];
-                let y = self.0.registers[vy];
+                // XXX: behavior depends on machine!
+                // COSMAC VIP:      64 x 32 pixel screen, x/y wrap around, overflow clips (current behavior)
+                // ??? "High Res":  64 x 64 pixel screen
+                // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#dxyn-display
+
+                let x = self.0.registers[vx] & 0x3F; // % 64 (screen width)
+                let y = self.0.registers[vy] & 0x1F; // % 32 (screen height)
                 let h = h.to_usize();
                 let mut sprite = [0u8; 16];
                 let sprite = &mut sprite[..h];
@@ -219,18 +242,30 @@ impl<S: Syscalls> Context<S> {
             }
 
             #[inline(always)] fn reg_dump(&mut self, v: V) -> Self::Result {
+                // XXX: behavior depends on machine!
+                // COSMAC VIP:  I is incremeneted during dump (current behavior)
+                // CHIP-48:     I remains original value
+                // SUPER-CHIP:  I remains original value
+                // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#fx55-and-fx65-store-and-load-memory
+
                 for v in V::iter().take(v.0.to_usize()+1) {
                     self.0.memory.write(Addr(self.0.registers.i.0 + v.0.to_u16()), self.0.registers[v]);
                 }
-                self.0.registers.i.0 += v.0.to_u16();
+                self.0.registers.i.0 += v.0.to_u16()+1;
                 self.0.step()
             }
 
             #[inline(always)] fn reg_load(&mut self, v: V) -> Self::Result {
+                // XXX: behavior depends on machine!
+                // COSMAC VIP:  I is incremeneted during dump (current behavior)
+                // CHIP-48:     I remains original value
+                // SUPER-CHIP:  I remains original value
+                // https://tobiasvl.github.io/blog/write-a-chip-8-emulator/#fx55-and-fx65-store-and-load-memory
+
                 for v in V::iter().take(v.0.to_usize()+1) {
                     self.0.registers[v] = self.0.memory.read(Addr(self.0.registers.i.0 + v.0.to_u16()));
                 }
-                self.0.registers.i.0 += v.0.to_u16();
+                self.0.registers.i.0 += v.0.to_u16()+1;
                 self.0.step()
             }
         }
