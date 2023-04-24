@@ -299,6 +299,9 @@ impl<S: Syscalls> Context<S> {
             _               => {},
         }
         self.registers.sound_playing = should_play;
+
+        let screen = self.screen().clone(); // XXX: extra 256-byte memcpy
+        self.syscalls.render(&screen);
     }
 
     #[inline] fn advance(&mut self, n: u16) -> bool { self.registers.pc.0 += n; true }

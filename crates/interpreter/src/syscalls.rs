@@ -1,3 +1,7 @@
+use crate::*;
+
+
+
 /// Platform specific code, in one convenient trait.
 pub trait Syscalls {
     #[cfg(not(feature = "default-syscalls"))]   fn rand(&self) -> u8;
@@ -7,6 +11,7 @@ pub trait Syscalls {
     fn is_pressed(&self, key: u8) -> bool;
     fn sound_play(&self);
     fn sound_stop(&self);
+    fn render(&self, screen: &ScreenMonochrome64x32);
 }
 
 impl Syscalls for () {
@@ -15,4 +20,5 @@ impl Syscalls for () {
     fn is_pressed(&self, _key: u8) -> bool { false }
     fn sound_play(&self) {}
     fn sound_stop(&self) {}
+    fn render(&self, _screen: &ScreenMonochrome64x32) {}
 }

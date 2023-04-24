@@ -2,7 +2,6 @@ use maulingmonkey_chip8_interpreter::*;
 
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering::Relaxed};
-use std::time::{Duration, Instant};
 
 
 
@@ -13,10 +12,22 @@ impl Syscalls for Console {
     fn is_pressed(&self, _key: u8) -> bool { false }
     fn sound_play(&self) { SOUND.store(true, Relaxed) }
     fn sound_stop(&self) { SOUND.store(false, Relaxed) }
+    fn render(&self, screen: &ScreenMonochrome64x32) {
+        let _ = std::io::stdout().write_all(b"\x1b[H"); // return cursor to 0,0
+        let mut stdout = std::io::stdout().lock();
+        for y in 0 .. 32 {
+            for x in 0 .. 64 {
+                let ch = [" ", "█"][usize::from(screen.get_pixel(x, y))];
+                let _ = stdout.write_all(ch.as_bytes());
+            }
+            let _ = stdout.write_all(b"\r\n");
+        }
+    }
 }
 
 fn main() {
     #[cfg(windows)] enable_virtual_terminal_sequences();
+    tls::set_syscalls_static(&Console);
 
     let mut args = std::env::args_os();
     let _exe = args.next();
@@ -27,39 +38,8 @@ fn main() {
         eprintln!("warning: failed to spawn sound thread: {err:?}");
     }
 
-    let mut ctx = Context::<Console>::default();
-    ctx.registers.pc = Addr::PROGRAM_START_TYPICAL;
-    ctx.memory.copy_from_io(ctx.registers.pc, ch8io).expect("failed to copy ROM into memory");
-    ctx.memory.copy_from_slice(Addr::TYPICAL_FONTS_START, bytemuck::cast_slice(font::DEFAULT)).expect("failed to copy font into memory"); // ≈ pointless?
-
-    let start = Instant::now();
-    let mut next_redraw = start;
-    let mut next_step = start;
-    loop {
-        let now = Instant::now();
-
-        // Step logic
-        while now >= next_step {
-            ctx.try_step_many(500/60); // aim for 500 hz
-            ctx.step_clocks();
-            next_step += Duration::from_millis(1000/60);
-        }
-
-        // Redraw
-        if now >= next_redraw {
-            next_redraw = now + Duration::from_millis(200);
-            let _ = std::io::stdout().write_all(b"\x1b[H"); // return cursor to 0,0
-            let screen = ctx.screen();
-            let mut stdout = std::io::stdout().lock();
-            for y in 0 .. 32 {
-                for x in 0 .. 64 {
-                    let ch = [" ", "█"][usize::from(screen.get_pixel(x, y))];
-                    let _ = stdout.write_all(ch.as_bytes());
-                }
-                let _ = stdout.write_all(b"\r\n");
-            }
-        }
-    }
+    let _id = tls::create_context(ch8io);
+    loop { tls::update() }
 }
 
 /// <https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences>
