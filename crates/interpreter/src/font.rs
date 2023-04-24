@@ -1,5 +1,14 @@
 #![allow(dead_code)]
 
+// N.B. there are multiple fonts, might embed multiple / allow user choice:
+//  https://github.com/mattmikolay/chip-8/issues/3
+//
+// Typefaces (e.g. letter shape) are not protected by US copyright, although they *can* be subject to design patents / trademarks.
+// Font programs (e.g. TTFs) *are* protected by US copyright.
+// https://www.crowdspring.com/blog/font-law-licensing/
+//
+// Crediting any sources would be polite however.
+
 const ____ : u8 = 0b0000_0000;
 const ___X : u8 = 0b0001_0000;
 const __X_ : u8 = 0b0010_0000;
