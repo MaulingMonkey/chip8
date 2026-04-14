@@ -17,7 +17,7 @@ path                = "src/_lib.rs"
 bytemuck.version    = "1"
 bytemuck.features   = ["derive"]
 instant.version     = "0.1"
-rand.version        = "0.8"
+rand.version        = "0.9"
 rand.optional       = true
 
 [target.'cfg(windows)'.dev-dependencies]
